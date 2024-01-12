@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:date/global.dart';
+import 'package:date/view/auth/login_screen.dart';
 import 'package:date/view/settings/account_setting.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart';
@@ -16,10 +17,10 @@ class UserDetailScreen extends StatefulWidget {
 }
 
 class _UserDetailScreenState extends State<UserDetailScreen> {
-  String name = "";
-  String age = "";
-  String phoneNo = "";
-  String city = "";
+  String name = '';
+  String age = '';
+  String phoneNo = '';
+  String city = '';
   String country = "";
   String profileHeading = "";
   String lookingForInaPartner = "";
@@ -39,9 +40,9 @@ class _UserDetailScreenState extends State<UserDetailScreen> {
   String willingToRelocate = "";
   String relationshipYouAreLookingFor = "";
   String nationality = "";
-  String eduation = "";
+  String eduation = '';
   String languageSpoken = "";
-  String religion = "";
+  String religion = '';
   String ethnicity = "";
   String urlImage1 =
       "https://firebasestorage.googleapis.com/v0/b/date-50347.appspot.com/o/placeholder%2Fprofile_avatar.jpg?alt=media&token=97e0f9f5-d4c6-42b5-98f9-4e66783c50cb";
@@ -62,7 +63,7 @@ class _UserDetailScreenState extends State<UserDetailScreen> {
         .then((snapshot) {
       if (snapshot.exists) {
         if (kDebugMode) {
-          print(snapshot.data());
+          print(snapshot.data()!['']);
         }
         if (snapshot.data()!["urlImage1"] != null) {
           setState(() {
@@ -79,15 +80,11 @@ class _UserDetailScreenState extends State<UserDetailScreen> {
           phoneNo = snapshot.data()!["phoneNo"];
           city = snapshot.data()!["city"];
           country = snapshot.data()!["country"];
-          profileHeading = snapshot.data()!["profileHeading"];
-          lookingForInaPartner = snapshot.data()!["relationshipType"];
-          height = snapshot.data()!["height"];
-          weight = snapshot.data()!["width"];
-          bodyType = snapshot.data()!["bodyType"];
           drink = snapshot.data()!["drink"];
           smoke = snapshot.data()!["smoke"];
-          martialStatus = snapshot.data()!["martialStatus"];
-          haveChildren = snapshot.data()!["haveChildren"];
+          religion = snapshot.data()!["religion"];
+          eduation = snapshot.data()!['education'];
+          profession = snapshot.data()!['profession'];
         });
       }
     });
@@ -99,7 +96,7 @@ class _UserDetailScreenState extends State<UserDetailScreen> {
     super.initState();
     retrieveUserInfo();
     if (kDebugMode) {
-      print("name" + name);
+      print("name:$currentUserID");
     }
   }
 
@@ -113,7 +110,7 @@ class _UserDetailScreenState extends State<UserDetailScreen> {
           ),
           centerTitle: true,
           // automaticallyImplyLeading: widget.userID==currentUserID?false:true,
-          leading: widget.userID != currentUserID
+          leading: widget.userID != FirebaseAuth.instance.currentUser!.uid
               ? IconButton(
                   onPressed: () {
                     Get.back();
@@ -124,7 +121,7 @@ class _UserDetailScreenState extends State<UserDetailScreen> {
                   ))
               : Container(),
           actions: [
-            widget.userID == currentUserID
+            widget.userID == FirebaseAuth.instance.currentUser!.uid
                 ? Row(
                     children: [
                       IconButton(
@@ -136,8 +133,11 @@ class _UserDetailScreenState extends State<UserDetailScreen> {
                             size: 30,
                           )),
                       IconButton(
-                          onPressed: () {
-                            FirebaseAuth.instance.signOut();
+                          onPressed: () async {
+                            try {
+                              await FirebaseAuth.instance.signOut();
+                              Get.offAll(LoginScreen());
+                            } catch (e) {}
                           },
                           icon: Icon(
                             Icons.logout,
@@ -227,12 +227,117 @@ class _UserDetailScreenState extends State<UserDetailScreen> {
                         Text(
                           name,
                           style: TextStyle(
-                            color: Colors.grey,
+                            color: Colors.black,
+                            fontSize: 18,
+                          ),
+                        )
+                      ]),
+                      TableRow(children: [
+                        Text(
+                          'city',
+                          style: TextStyle(
+                            color: Colors.black,
                             fontSize: 18,
                           ),
                         ),
                         Text(
-                          name,
+                          city,
+                          style: TextStyle(
+                            color: Colors.black,
+                            fontSize: 18,
+                          ),
+                        )
+                      ]),
+                      TableRow(children: [
+                        Text(
+                          'Phone No',
+                          style: TextStyle(
+                            color: Colors.black,
+                            fontSize: 18,
+                          ),
+                        ),
+                        Text(
+                          phoneNo,
+                          style: TextStyle(
+                            color: Colors.black,
+                            fontSize: 18,
+                          ),
+                        )
+                      ]),
+                      TableRow(children: [
+                        Text(
+                          'Religion',
+                          style: TextStyle(
+                            color: Colors.black,
+                            fontSize: 18,
+                          ),
+                        ),
+                        Text(
+                          religion,
+                          style: TextStyle(
+                            color: Colors.black,
+                            fontSize: 18,
+                          ),
+                        )
+                      ]),
+                      TableRow(children: [
+                        Text(
+                          'Education',
+                          style: TextStyle(
+                            color: Colors.black,
+                            fontSize: 18,
+                          ),
+                        ),
+                        Text(
+                          eduation,
+                          style: TextStyle(
+                            color: Colors.black,
+                            fontSize: 18,
+                          ),
+                        )
+                      ]),
+                      TableRow(children: [
+                        Text(
+                          'profession',
+                          style: TextStyle(
+                            color: Colors.black,
+                            fontSize: 18,
+                          ),
+                        ),
+                        Text(
+                          profession,
+                          style: TextStyle(
+                            color: Colors.black,
+                            fontSize: 18,
+                          ),
+                        )
+                      ]),
+                      TableRow(children: [
+                        Text(
+                          'Drink',
+                          style: TextStyle(
+                            color: Colors.black,
+                            fontSize: 18,
+                          ),
+                        ),
+                        Text(
+                          drink,
+                          style: TextStyle(
+                            color: Colors.black,
+                            fontSize: 18,
+                          ),
+                        )
+                      ]),
+                      TableRow(children: [
+                        Text(
+                          'Smoke',
+                          style: TextStyle(
+                            color: Colors.black,
+                            fontSize: 18,
+                          ),
+                        ),
+                        Text(
+                          smoke,
                           style: TextStyle(
                             color: Colors.black,
                             fontSize: 18,

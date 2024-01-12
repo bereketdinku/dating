@@ -5,8 +5,10 @@ class Person {
   String? imageProfile;
   String? name;
   String? email;
+
   String? password;
   int? age;
+  String? gender;
   String? phoneNo;
   String? city;
   String? country;
@@ -36,6 +38,7 @@ class Person {
       {this.uid,
       this.imageProfile,
       this.age,
+      this.gender,
       this.bodyType,
       this.city,
       this.country,
@@ -72,6 +75,7 @@ class Person {
         age: dataSnapshot['age'],
         email: dataSnapshot['email'],
         password: dataSnapshot['password'],
+        gender: dataSnapshot['gender'],
         imageProfile: dataSnapshot['imageProfile'],
         bodyType: dataSnapshot['bodyType'],
         city: dataSnapshot['city'],
@@ -112,6 +116,7 @@ class Person {
         "email": email,
         "employementStatus": employementStatus,
         "ethnicity": ethnicity,
+        "gender": gender,
         "haveChildren": haveChildren,
         "height": height,
         "income": income,

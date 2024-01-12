@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
@@ -15,11 +16,12 @@ class _LikeScreenState extends State<LikeScreen> {
   List<String> likeSentList = [];
   List<String> likeReceivedList = [];
   List likesList = [];
+
   getFavoriteListKeys() async {
     if (isFavoriteSentClicked) {
       var favoriteSentDocument = await FirebaseFirestore.instance
           .collection("users")
-          .doc(currentUserID.toString())
+          .doc(FirebaseAuth.instance.currentUser!.uid)
           .collection('likeSent')
           .get();
 
@@ -30,12 +32,13 @@ class _LikeScreenState extends State<LikeScreen> {
     } else {
       var favoriteReceivedDocument = await FirebaseFirestore.instance
           .collection("users")
-          .doc(currentUserID.toString())
+          .doc(FirebaseAuth.instance.currentUser!.uid)
           .collection('likeReceived')
           .get();
       for (int i = 0; i < favoriteReceivedDocument.docs.length; i++) {
         likeReceivedList.add(favoriteReceivedDocument.docs[i].id);
       }
+      getKeyDataFromUsersCollection(likeReceivedList);
     }
   }
 

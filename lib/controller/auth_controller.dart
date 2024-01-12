@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:date/global.dart';
+import 'package:date/view/auth/login_screen.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/foundation.dart';
@@ -13,6 +14,7 @@ import '../view/home/home_screen.dart';
 class AuthenticationController extends GetxController {
   static AuthenticationController authenticationController = Get.find();
   late Rx<File?> pickedFile;
+  late Rx<User?> firebaseCurrentUser;
   XFile? imageFile;
   File? get profileImage => pickedFile.value;
   pickImageFileFromGallery() async {
@@ -50,6 +52,7 @@ class AuthenticationController extends GetxController {
     String name,
     String email,
     String password,
+    String? gender,
     String phoneNo,
     String city,
     String country,
@@ -57,7 +60,6 @@ class AuthenticationController extends GetxController {
     String smoke,
     String profession,
     String education,
-    String languageSpoken,
     String religion,
   ) async {
     try {
@@ -73,13 +75,13 @@ class AuthenticationController extends GetxController {
         email: email,
         password: password,
         age: int.parse(age),
+        gender: gender,
         phoneNo: phoneNo,
         name: name,
         city: city,
         country: country,
         drink: drink,
         education: education,
-        languageSpoken: languageSpoken,
         profession: profession,
         publishedDateTime: DateTime.now().millisecondsSinceEpoch,
         smoke: smoke,
@@ -110,6 +112,14 @@ class AuthenticationController extends GetxController {
     } catch (error) {
       Get.snackbar("Login Unsuccessful",
           "Error occurred during signin authentication:${error}");
+    }
+  }
+
+  checkIfUserIsLoggedIn(User? currentUser) {
+    if (currentUser == null) {
+      Get.to(LoginScreen());
+    } else {
+      Get.to(HomeScreen());
     }
   }
 
@@ -164,4 +174,13 @@ class AuthenticationController extends GetxController {
   //       .where("users", arrayContains: myUsername!)
   //       .snapshots();
   // }
+
+  // @override
+  void onReady() {
+    // TODO: implement onReady
+    super.onReady();
+    firebaseCurrentUser = Rx<User?>(FirebaseAuth.instance.currentUser);
+    firebaseCurrentUser.bindStream(FirebaseAuth.instance.authStateChanges());
+    ever(firebaseCurrentUser, checkIfUserIsLoggedIn);
+  }
 }

@@ -55,6 +55,8 @@ class _SignUpScreenState extends State<SignUpScreen> {
   TextEditingController religionTextEditingController = TextEditingController();
   TextEditingController ethnicityTextEditingController =
       TextEditingController();
+  TextEditingController _genderTextEditingController = TextEditingController();
+  String? selectedGender;
   bool showProgressBar = false;
   var authenticationController =
       AuthenticationController.authenticationController;
@@ -195,6 +197,35 @@ class _SignUpScreenState extends State<SignUpScreen> {
                   iconData: Icons.numbers,
                 ),
               ),
+              SizedBox(
+                width: MediaQuery.of(context).size.width - 40,
+                height: 50,
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    DropdownButton<String>(
+                      alignment: Alignment.centerLeft,
+                      hint: Text('Select Gender'),
+                      value: selectedGender,
+                      onChanged: (String? newValue) {
+                        setState(() {
+                          selectedGender = newValue;
+                          _genderTextEditingController.text =
+                              selectedGender ?? 'Select Gender';
+                        });
+                      },
+                      items: ['Male', 'Female']
+                          .map<DropdownMenuItem<String>>((String value) {
+                        return DropdownMenuItem<String>(
+                          value: value,
+                          child: Text(value),
+                        );
+                      }).toList(),
+                    ),
+                  ],
+                ),
+              ),
               const SizedBox(
                 height: 15,
               ),
@@ -329,7 +360,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                 width: MediaQuery.of(context).size.width - 30,
                 height: 50,
                 decoration: BoxDecoration(
-                    color: Colors.white,
+                    color: Colors.pinkAccent,
                     borderRadius: BorderRadius.all(Radius.circular(12))),
                 child: InkWell(
                   onTap: () {
@@ -364,6 +395,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                             nameTextEditingController.text.trim(),
                             emailTextEditingController.text.trim(),
                             passwordTextEditingController.text.trim(),
+                            selectedGender!.toLowerCase(),
                             phoneTextEditingController.text.trim(),
                             cityTextEditingController.text.trim(),
                             countryTextEditingController.text.trim(),
@@ -371,7 +403,6 @@ class _SignUpScreenState extends State<SignUpScreen> {
                             smokeTextEditingController.text.trim(),
                             professionTextEditingController.text.trim(),
                             educationTextEditingController.text.trim(),
-                            languageTextEditingController.text.trim(),
                             religionTextEditingController.text.trim());
                         setState(() {
                           showProgressBar = false;

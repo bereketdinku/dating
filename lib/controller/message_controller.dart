@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:date/global.dart';
 import 'package:date/models/message.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
@@ -10,6 +11,7 @@ class ChatController extends ChangeNotifier {
   Future<void> sendMessage(String receiverId, String message) async {
     final String currentUserId = _firebaseAuth.currentUser!.uid;
     final Timestamp timestamp = Timestamp.now();
+
     Message newMessage = Message(
         senderId: currentUserId,
         receiverId: receiverId,
@@ -18,6 +20,7 @@ class ChatController extends ChangeNotifier {
     List<String> ids = [currentUserId, receiverId];
     ids.sort();
     String chatRoomId = ids.join("_");
+
     await _firebaseFirestore
         .collection('chat_rooms')
         .doc(currentUserId)
@@ -39,6 +42,14 @@ class ChatController extends ChangeNotifier {
         .doc(userId)
         .collection('messages')
         .orderBy('timestamp', descending: false)
+        .snapshots();
+  }
+
+  Stream<QuerySnapshot> getMessageList() {
+    return _firebaseFirestore
+        .collection('chat_rooms')
+        .doc(FirebaseAuth.instance.currentUser!.uid)
+        .collection('messages')
         .snapshots();
   }
 }

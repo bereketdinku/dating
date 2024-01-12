@@ -1,7 +1,10 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:date/global.dart';
+import 'package:date/view/tab/user_detail.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 
 class FavoriteScreen extends StatefulWidget {
   const FavoriteScreen({super.key});
@@ -18,7 +21,7 @@ class _FavoriteScreenState extends State<FavoriteScreen> {
     if (isFavoriteSentClicked) {
       var favoriteSentDocument = await FirebaseFirestore.instance
           .collection("users")
-          .doc(currentUserID.toString())
+          .doc(FirebaseAuth.instance.currentUser!.uid)
           .collection('favoriteSent')
           .get();
 
@@ -29,12 +32,13 @@ class _FavoriteScreenState extends State<FavoriteScreen> {
     } else {
       var favoriteReceivedDocument = await FirebaseFirestore.instance
           .collection("users")
-          .doc(currentUserID.toString())
+          .doc(FirebaseAuth.instance.currentUser!.uid)
           .collection('favoriteReceived')
           .get();
       for (int i = 0; i < favoriteReceivedDocument.docs.length; i++) {
         favoriteReceivedList.add(favoriteReceivedDocument.docs[i].id);
       }
+      getKeyDataFromUsersCollection(favoriteReceivedList);
     }
   }
 
@@ -46,9 +50,6 @@ class _FavoriteScreenState extends State<FavoriteScreen> {
         if (((alluserDocument.docs[i].data() as dynamic)["uid"]) ==
             keysList[k]) {
           favoritesList.add(alluserDocument.docs[i].data());
-          if (kDebugMode) {
-            print(favoritesList);
-          }
         }
       }
     }
@@ -126,7 +127,7 @@ class _FavoriteScreenState extends State<FavoriteScreen> {
             ? const Center(
                 child: Icon(
                   Icons.person_off_sharp,
-                  color: Colors.white,
+                  color: Colors.black,
                   size: 60,
                 ),
               )
@@ -140,7 +141,11 @@ class _FavoriteScreenState extends State<FavoriteScreen> {
                     child: Card(
                       color: Colors.blue.shade200,
                       child: GestureDetector(
-                        onTap: () {},
+                        onTap: () {
+                          Get.to(UserDetailScreen(
+                            userID: favoritesList[index]["uid"],
+                          ));
+                        },
                         child: DecoratedBox(
                           decoration: BoxDecoration(
                             image: DecorationImage(

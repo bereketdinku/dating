@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:date/global.dart';
 import 'package:date/view/home/home_screen.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -25,6 +26,8 @@ class _AccountSettingScreenState extends State<AccountSettingScreen> {
   String name = "";
   String age = "";
   String phoneNo = "";
+  String email = "";
+  String password = "";
   String city = "";
   String country = "";
   String profileHeading = "";
@@ -59,7 +62,7 @@ class _AccountSettingScreenState extends State<AccountSettingScreen> {
       "https://firebasestorage.googleapis.com/v0/b/date-50347.appspot.com/o/placeholder%2Fprofile_avatar.jpg?alt=media&token=97e0f9f5-d4c6-42b5-98f9-4e66783c50cb";
   String urlImage5 =
       "https://firebasestorage.googleapis.com/v0/b/date-50347.appspot.com/o/placeholder%2Fprofile_avatar.jpg?alt=media&token=97e0f9f5-d4c6-42b5-98f9-4e66783c50cb";
-
+  String? selectedGender;
   chooseImage() async {
     XFile? pickedFile =
         await ImagePicker().pickImage(source: ImageSource.gallery);
@@ -88,7 +91,7 @@ class _AccountSettingScreenState extends State<AccountSettingScreen> {
   retrieveUserData() async {
     await FirebaseFirestore.instance
         .collection("users")
-        .doc(currentUserID)
+        .doc(FirebaseAuth.instance.currentUser!.uid)
         .get()
         .then((snapshot) {
       if (snapshot.exists) {
@@ -96,27 +99,31 @@ class _AccountSettingScreenState extends State<AccountSettingScreen> {
           name = snapshot.data()!["name"];
           nameTextEditingController.text = name;
           age = snapshot.data()!["age"].toString();
+          email = snapshot.data()!['email'].toString();
+          emailTextEditingController.text = email;
           ageTextEditingController.text = age;
-          phoneNo = snapshot.data()!["phoneNo"];
-          city = snapshot.data()!["city"];
-          country = snapshot.data()!["country"];
-          profileHeading = snapshot.data()!["profileHeading"];
-          lookingForInaPartner = snapshot.data()!["relationshipType"];
-          height = snapshot.data()!["height"];
-          weight = snapshot.data()!["width"];
-          bodyType = snapshot.data()!["bodyType"];
-          drink = snapshot.data()!["drink"];
-          smoke = snapshot.data()!["smoke"];
-          martialStatus = snapshot.data()!["martialStatus"];
-          haveChildren = snapshot.data()!["haveChildren"];
+          selectedGender = snapshot.data()!['gender'].toString();
+          phoneNo = snapshot.data()!["phoneNo"].toString();
+          phoneTextEditingController.text = phoneNo;
+          city = snapshot.data()!["city"].toString();
+          cityTextEditingController.text = city;
+          country = snapshot.data()!["country"].toString();
+          countryTextEditingController.text = country;
+          drink = snapshot.data()!["drink"].toString();
+          drinkTextEditingController.text = drink;
+          smoke = snapshot.data()!["smoke"].toString();
+          smokeTextEditingController.text = smoke;
+          religion = snapshot.data()!["religion"].toString();
+          religionTextEditingController.text = religion;
+          profession = snapshot.data()!["profession"];
+          professionTextEditingController.text = profession;
         });
       }
     });
   }
 
-  updateUserData(
-    String name,
-  ) async {
+  updateUserData(String name, String age, String phoneNo, String city,
+      String country, String email, String? gender) async {
     showDialog(
         context: context,
         builder: (context) {
@@ -138,15 +145,21 @@ class _AccountSettingScreenState extends State<AccountSettingScreen> {
             ),
           );
         });
-    uploadImages();
+    await uploadImages();
     await FirebaseFirestore.instance
         .collection("users")
-        .doc(currentUserID)
+        .doc(FirebaseAuth.instance.currentUser!.uid)
         .update({
       'name': name,
+      'age': int.parse(age),
+      'city': city,
+      'email': email,
+      'gender': gender!.toLowerCase(),
       'urlImage1': urlsList[0].toString(),
       'urlImage2': urlsList[1].toString(),
       'urlImage3': urlsList[2].toString(),
+      'urlImage4': urlsList[3].toString(),
+      'urlImage5': urlsList[4].toString()
     });
     Get.snackbar("Updated", "your account has been updated");
     Get.to(HomeScreen());
@@ -164,40 +177,18 @@ class _AccountSettingScreenState extends State<AccountSettingScreen> {
   TextEditingController phoneTextEditingController = TextEditingController();
   TextEditingController cityTextEditingController = TextEditingController();
   TextEditingController countryTextEditingController = TextEditingController();
-  TextEditingController profileHeadingTextEditingController =
-      TextEditingController();
-  TextEditingController imagePartnerTextEditingController =
-      TextEditingController();
-  TextEditingController heightTextEditingController = TextEditingController();
-  TextEditingController widthTextEditingController = TextEditingController();
-  TextEditingController bodyTypeTextEditingController = TextEditingController();
+
   TextEditingController drinkTextEditingController = TextEditingController();
   TextEditingController smokeTextEditingController = TextEditingController();
-  TextEditingController martialStatusTextEditingController =
-      TextEditingController();
-  TextEditingController haveChildrenTextEditingController =
-      TextEditingController();
-  TextEditingController noChildrenTextEditingController =
-      TextEditingController();
+
   TextEditingController professionTextEditingController =
       TextEditingController();
-  TextEditingController employmentStatusTextEditingController =
-      TextEditingController();
-  TextEditingController incomeTextEditingController = TextEditingController();
-  TextEditingController livingSituationTextEditingController =
-      TextEditingController();
-  TextEditingController willingToRelocateTextEditingController =
-      TextEditingController();
-  TextEditingController relationTypeTextEditingController =
-      TextEditingController();
-  TextEditingController nationalityTextEditingController =
-      TextEditingController();
+
   TextEditingController educationTextEditingController =
       TextEditingController();
-  TextEditingController languageTextEditingController = TextEditingController();
   TextEditingController religionTextEditingController = TextEditingController();
-  TextEditingController ethnicityTextEditingController =
-      TextEditingController();
+  TextEditingController _genderTextEditingController = TextEditingController();
+
   @override
   void initState() {
     // TODO: implement initState
@@ -238,28 +229,6 @@ class _AccountSettingScreenState extends State<AccountSettingScreen> {
                 padding: EdgeInsets.all(30),
                 child: Column(
                   children: [
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        IconButton(
-                            onPressed: () async {},
-                            icon: Icon(
-                              Icons.image_outlined,
-                              color: Colors.grey,
-                              size: 30,
-                            )),
-                        SizedBox(
-                          width: 15,
-                        ),
-                        IconButton(
-                            onPressed: () async {},
-                            icon: Icon(
-                              Icons.camera_alt_outlined,
-                              color: Colors.grey,
-                              size: 30,
-                            ))
-                      ],
-                    ),
                     const SizedBox(
                       height: 20,
                     ),
@@ -325,6 +294,35 @@ class _AccountSettingScreenState extends State<AccountSettingScreen> {
                     SizedBox(
                       width: MediaQuery.of(context).size.width - 40,
                       height: 50,
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.start,
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          DropdownButton<String>(
+                            alignment: Alignment.centerLeft,
+                            hint: Text('Select Gender'),
+                            value: selectedGender,
+                            onChanged: (String? newValue) {
+                              setState(() {
+                                selectedGender = newValue;
+                                _genderTextEditingController.text =
+                                    selectedGender ?? 'Select Gender';
+                              });
+                            },
+                            items: ['Male', 'Female']
+                                .map<DropdownMenuItem<String>>((String value) {
+                              return DropdownMenuItem<String>(
+                                value: value,
+                                child: Text(value),
+                              );
+                            }).toList(),
+                          ),
+                        ],
+                      ),
+                    ),
+                    SizedBox(
+                      width: MediaQuery.of(context).size.width - 40,
+                      height: 50,
                       child: CustomTextField(
                         isObsecure: false,
                         editingController: phoneTextEditingController,
@@ -358,81 +356,11 @@ class _AccountSettingScreenState extends State<AccountSettingScreen> {
                         iconData: Icons.location_city,
                       ),
                     ),
+
                     const SizedBox(
                       height: 15,
                     ),
-                    SizedBox(
-                      width: MediaQuery.of(context).size.width - 40,
-                      height: 50,
-                      child: CustomTextField(
-                        isObsecure: false,
-                        editingController: profileHeadingTextEditingController,
-                        labelText: "Profile Heading",
-                        iconData: Icons.text_fields,
-                      ),
-                    ),
-                    const SizedBox(
-                      height: 15,
-                    ),
-                    SizedBox(
-                      width: MediaQuery.of(context).size.width - 40,
-                      height: 50,
-                      child: CustomTextField(
-                        isObsecure: false,
-                        editingController: imagePartnerTextEditingController,
-                        labelText: "What you're looking for in a partner",
-                        iconData: Icons.face,
-                      ),
-                    ),
-                    const SizedBox(
-                      height: 15,
-                    ),
-                    const Text(
-                      "Appearance Info:",
-                      style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 20,
-                          fontWeight: FontWeight.bold),
-                    ),
-                    const SizedBox(
-                      height: 15,
-                    ),
-                    SizedBox(
-                      width: MediaQuery.of(context).size.width - 40,
-                      height: 50,
-                      child: CustomTextField(
-                        isObsecure: false,
-                        editingController: heightTextEditingController,
-                        labelText: "Height",
-                        iconData: Icons.insert_chart,
-                      ),
-                    ),
-                    const SizedBox(
-                      height: 15,
-                    ),
-                    SizedBox(
-                      width: MediaQuery.of(context).size.width - 40,
-                      height: 50,
-                      child: CustomTextField(
-                        isObsecure: false,
-                        editingController: widthTextEditingController,
-                        labelText: "Width",
-                        iconData: Icons.table_chart,
-                      ),
-                    ),
-                    const SizedBox(
-                      height: 15,
-                    ),
-                    SizedBox(
-                      width: MediaQuery.of(context).size.width - 40,
-                      height: 50,
-                      child: CustomTextField(
-                        isObsecure: false,
-                        editingController: bodyTypeTextEditingController,
-                        labelText: "Body Type",
-                        iconData: Icons.type_specimen,
-                      ),
-                    ),
+
                     const Text(
                       "Life style:",
                       style: TextStyle(
@@ -466,45 +394,7 @@ class _AccountSettingScreenState extends State<AccountSettingScreen> {
                         iconData: Icons.smoking_rooms,
                       ),
                     ),
-                    const SizedBox(
-                      height: 15,
-                    ),
-                    SizedBox(
-                      width: MediaQuery.of(context).size.width - 40,
-                      height: 50,
-                      child: CustomTextField(
-                        isObsecure: false,
-                        editingController: martialStatusTextEditingController,
-                        labelText: "Martial Status",
-                        iconData: Icons.person_2,
-                      ),
-                    ),
-                    const SizedBox(
-                      height: 15,
-                    ),
-                    SizedBox(
-                      width: MediaQuery.of(context).size.width - 40,
-                      height: 50,
-                      child: CustomTextField(
-                        isObsecure: false,
-                        editingController: haveChildrenTextEditingController,
-                        labelText: "Do you have Children?",
-                        iconData: CupertinoIcons.person_3_fill,
-                      ),
-                    ),
-                    const SizedBox(
-                      height: 15,
-                    ),
-                    SizedBox(
-                      width: MediaQuery.of(context).size.width - 40,
-                      height: 50,
-                      child: CustomTextField(
-                        isObsecure: false,
-                        editingController: noChildrenTextEditingController,
-                        labelText: "No of Children",
-                        iconData: CupertinoIcons.person_3_fill,
-                      ),
-                    ),
+
                     const SizedBox(
                       height: 15,
                     ),
@@ -518,74 +408,7 @@ class _AccountSettingScreenState extends State<AccountSettingScreen> {
                         iconData: Icons.business_center,
                       ),
                     ),
-                    const SizedBox(
-                      height: 15,
-                    ),
-                    SizedBox(
-                      width: MediaQuery.of(context).size.width - 40,
-                      height: 50,
-                      child: CustomTextField(
-                        isObsecure: false,
-                        editingController:
-                            employmentStatusTextEditingController,
-                        labelText: "Employment Status",
-                        iconData:
-                            CupertinoIcons.rectangle_stack_person_crop_fill,
-                      ),
-                    ),
-                    const SizedBox(
-                      height: 15,
-                    ),
-                    SizedBox(
-                      width: MediaQuery.of(context).size.width - 40,
-                      height: 50,
-                      child: CustomTextField(
-                        isObsecure: false,
-                        editingController: incomeTextEditingController,
-                        labelText: "Income",
-                        iconData: CupertinoIcons.money_dollar_circle,
-                      ),
-                    ),
-                    const SizedBox(
-                      height: 15,
-                    ),
-                    SizedBox(
-                      width: MediaQuery.of(context).size.width - 40,
-                      height: 50,
-                      child: CustomTextField(
-                        isObsecure: false,
-                        editingController: livingSituationTextEditingController,
-                        labelText: "Living Situation",
-                        iconData: CupertinoIcons.person_2_square_stack,
-                      ),
-                    ),
-                    const SizedBox(
-                      height: 15,
-                    ),
-                    SizedBox(
-                      width: MediaQuery.of(context).size.width - 40,
-                      height: 50,
-                      child: CustomTextField(
-                        isObsecure: false,
-                        editingController:
-                            willingToRelocateTextEditingController,
-                        labelText: "Willing to Relocate",
-                        iconData: CupertinoIcons.person_2,
-                      ),
-                    ),
-                    const SizedBox(
-                      height: 15,
-                    ),
-                    SizedBox(
-                      width: MediaQuery.of(context).size.width - 40,
-                      height: 50,
-                      child: CustomTextField(
-                        isObsecure: false,
-                        editingController: relationTypeTextEditingController,
-                        labelText: "relationship You are looking for",
-                        iconData: CupertinoIcons.person_2,
-                      ),
-                    ),
+
                     const Text(
                       "Background-cultural Values:",
                       style: TextStyle(
@@ -593,19 +416,7 @@ class _AccountSettingScreenState extends State<AccountSettingScreen> {
                           fontSize: 20,
                           fontWeight: FontWeight.bold),
                     ),
-                    const SizedBox(
-                      height: 15,
-                    ),
-                    SizedBox(
-                      width: MediaQuery.of(context).size.width - 40,
-                      height: 50,
-                      child: CustomTextField(
-                        isObsecure: false,
-                        editingController: nationalityTextEditingController,
-                        labelText: "Nationality",
-                        iconData: Icons.flag_circle_outlined,
-                      ),
-                    ),
+
                     const SizedBox(
                       height: 15,
                     ),
@@ -619,19 +430,7 @@ class _AccountSettingScreenState extends State<AccountSettingScreen> {
                         iconData: Icons.history_edu_outlined,
                       ),
                     ),
-                    const SizedBox(
-                      height: 15,
-                    ),
-                    SizedBox(
-                      width: MediaQuery.of(context).size.width - 40,
-                      height: 50,
-                      child: CustomTextField(
-                        isObsecure: false,
-                        editingController: languageTextEditingController,
-                        labelText: "Language Spoken",
-                        iconData: CupertinoIcons.person_badge_plus_fill,
-                      ),
-                    ),
+
                     const SizedBox(
                       height: 15,
                     ),
@@ -648,16 +447,7 @@ class _AccountSettingScreenState extends State<AccountSettingScreen> {
                     const SizedBox(
                       height: 15,
                     ),
-                    SizedBox(
-                      width: MediaQuery.of(context).size.width - 40,
-                      height: 50,
-                      child: CustomTextField(
-                        isObsecure: false,
-                        editingController: ethnicityTextEditingController,
-                        labelText: "Ethnicity",
-                        iconData: CupertinoIcons.eye,
-                      ),
-                    ),
+
                     Container(
                       width: MediaQuery.of(context).size.width - 30,
                       height: 50,
@@ -672,15 +462,21 @@ class _AccountSettingScreenState extends State<AccountSettingScreen> {
                             _image.length > 0
                                 ? updateUserData(
                                     nameTextEditingController.text.trim(),
-                                  )
+                                    ageTextEditingController.text.trim(),
+                                    phoneTextEditingController.text.trim(),
+                                    cityTextEditingController.text.trim(),
+                                    countryTextEditingController.text.trim(),
+                                    emailTextEditingController.text.trim(),
+                                    selectedGender)
                                 : null;
                           } else {
-                            Get.snackbar("Image File Missing", "fill");
+                            Get.snackbar("A Field is Empty",
+                                "please fill out all field in text field");
                           }
                         },
                         child: Center(
                             child: Text(
-                          "Register",
+                          "update",
                           style: TextStyle(
                               fontSize: 20,
                               color: Colors.black,
@@ -688,30 +484,7 @@ class _AccountSettingScreenState extends State<AccountSettingScreen> {
                         )),
                       ),
                     ),
-                    const SizedBox(
-                      height: 15,
-                    ),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Text(
-                          " have an account?",
-                          style: TextStyle(fontSize: 16, color: Colors.grey),
-                        ),
-                        InkWell(
-                          onTap: () {
-                            Get.back();
-                          },
-                          child: const Text(
-                            "Sign In",
-                            style: TextStyle(
-                                fontSize: 15,
-                                color: Colors.white,
-                                fontWeight: FontWeight.bold),
-                          ),
-                        )
-                      ],
-                    ),
+
                     const SizedBox(
                       height: 16,
                     ),

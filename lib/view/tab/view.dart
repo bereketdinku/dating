@@ -1,9 +1,13 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:date/controller/message_controller.dart';
 import 'package:date/global.dart';
 import 'package:date/view/chat/chat_page.dart';
+import 'package:date/widgets/chat_user_card.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:intl/intl.dart';
 
 class ViewScreen extends StatefulWidget {
   const ViewScreen({super.key});
@@ -16,6 +20,7 @@ class _ViewScreenState extends State<ViewScreen> {
   List<String> viewSentList = [];
   List<String> viewReceivedList = [];
   List viewsList = [];
+  final ChatController _chatController = Get.put(ChatController());
   getFavoriteListKeys() async {
     if (isFavoriteSentClicked) {
       var viewSentDocument = await FirebaseFirestore.instance
@@ -132,56 +137,59 @@ class _ViewScreenState extends State<ViewScreen> {
                   size: 60,
                 ),
               )
-            : Column(
-                children: <Widget>[
-                  Expanded(
-                      child: Container(
-                          height: 500,
-                          decoration: BoxDecoration(
-                              borderRadius: BorderRadius.only(
-                                  topLeft: Radius.circular(30),
-                                  topRight: Radius.circular(30))),
-                          child: Column(
-                            children: [
-                              Container(
-                                height: 120,
-                                child: ListView.builder(
-                                    scrollDirection: Axis.vertical,
-                                    itemCount: viewsList.length,
-                                    padding: EdgeInsets.only(left: 10),
-                                    itemBuilder:
-                                        (BuildContext context, int index) {
-                                      return GestureDetector(
-                                        onTap: () {
-                                          Get.to(ChatPage(
-                                              uid: viewsList[index]['uid']));
-                                        },
-                                        child: Row(
-                                          crossAxisAlignment:
-                                              CrossAxisAlignment.center,
-                                          children: <Widget>[
-                                            CircleAvatar(
-                                              radius: 35,
-                                              backgroundImage: NetworkImage(
-                                                  viewsList[index]
-                                                      ['imageProfile']),
-                                            ),
-                                            SizedBox(
-                                              width: 10,
-                                            ),
-                                            Text(viewsList[index]['city']),
-                                            Text(
-                                              'New',
-                                              style: TextStyle(),
-                                            )
-                                          ],
-                                        ),
-                                      );
-                                    }),
-                              ),
-                            ],
-                          )))
-                ],
-              ));
+            : _buildMessageList());
+  }
+
+  Widget _buildMessageList() {
+    return StreamBuilder(
+        stream: _chatController.getMessages(currentUserID),
+        builder: (context, snapshot) {
+          if (snapshot.hasError) {
+            return Text('Error${snapshot.error}');
+          }
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const Text('Loading');
+          }
+          return ListView(
+            children: snapshot.data!.docs
+                .map((document) => _buildMessageItem(document))
+                .toList(),
+          );
+        });
+  }
+
+  Widget _buildMessageItem(DocumentSnapshot document) {
+    Map<String, dynamic> data = document.data() as Map<String, dynamic>;
+    var alignment = (data['senderId'] == currentUserID)
+        ? Alignment.centerRight
+        : Alignment.centerLeft;
+    Timestamp timestamp = data['timestamp'];
+    String formattedDate =
+        DateFormat('yyyy-MM-dd – kk:mm').format(timestamp.toDate());
+    return InkWell(
+      onTap: () {
+        Get.to(ChatPage(uid: data['receiverId']));
+      },
+      child: Card(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
+        elevation: 1,
+        margin: EdgeInsets.symmetric(
+            horizontal: MediaQuery.of(context).size.width * .04, vertical: 4),
+        child: ListTile(
+          leading: CircleAvatar(
+            child: Icon(CupertinoIcons.person),
+          ),
+          title: Text('Demo'),
+          subtitle: Text(
+            data['message'],
+            maxLines: 1,
+          ),
+          trailing: Text(
+            formattedDate,
+            style: TextStyle(color: Colors.black),
+          ),
+        ),
+      ),
+    );
   }
 }

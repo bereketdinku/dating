@@ -4,18 +4,26 @@ import 'package:date/view/auth/login_screen.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:permission_handler/permission_handler.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(
-      options: FirebaseOptions(
-          apiKey: "AIzaSyD3kxU-VND-wSKYFc_pxgPUR72ByT0NPdM",
-          appId: "1:832945625672:android:a96b7bf5f05db854b7967d",
-          messagingSenderId: "832945625672",
-          projectId: "date-50347",
-          storageBucket: "date-50347.appspot.com"));
-  Get.put(AuthenticationController());
-  await PushNotification().initNotification();
+          options: FirebaseOptions(
+              apiKey: "AIzaSyD3kxU-VND-wSKYFc_pxgPUR72ByT0NPdM",
+              appId: "1:832945625672:android:a96b7bf5f05db854b7967d",
+              messagingSenderId: "832945625672",
+              projectId: "date-50347",
+              storageBucket: "date-50347.appspot.com"))
+      .then((value) {
+    Get.put(AuthenticationController());
+  });
+  await Permission.notification.isDenied.then((value) {
+    if (value) {
+      Permission.notification.request();
+    }
+  });
+  await PushNotificationSystems().initNotification();
   runApp(const MyApp());
 }
 

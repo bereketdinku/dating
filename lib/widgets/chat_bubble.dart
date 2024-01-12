@@ -8,6 +8,7 @@ class ChatBubble extends StatelessWidget {
   Widget build(BuildContext context) {
     // TODO: implement build
     return Container(
+      padding: EdgeInsets.all(8),
       decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(13), color: Colors.pinkAccent),
       child: Text(

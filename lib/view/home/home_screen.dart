@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:date/global.dart';
+import 'package:date/notification/push_notification.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/foundation.dart';
@@ -26,36 +27,39 @@ class _HomeScreenState extends State<HomeScreen> {
   void initState() {
     // TODO: implement initState
     super.initState();
-    getToken();
+    PushNotificationSystems notificationSystems = PushNotificationSystems();
+    notificationSystems.generateDeviceRegistrationToken();
+    notificationSystems.whenNotificationReceived(context);
+    // getToken();
   }
 
-  void getToken() async {
-    await FirebaseMessaging.instance.getToken().then((token) {
-      setState(() {
-        token = token;
-        if (kDebugMode) {
-          print("my token $token");
-        }
-      });
-      saveToken(token!);
-    });
-  }
+  // void getToken() async {
+  //   await FirebaseMessaging.instance.getToken().then((token) {
+  //     setState(() {
+  //       token = token;
+  //       if (kDebugMode) {
+  //         print("my token $token");
+  //       }
+  //     });
+  //     saveToken(token!);
+  //   });
+  // }
 
-  void saveToken(String token) async {
-    await FirebaseFirestore.instance
-        .collection('users')
-        .doc(currentUserID)
-        .set({'token': token});
-  }
+  // void saveToken(String token) async {
+  //   await FirebaseFirestore.instance
+  //       .collection('users')
+  //       .doc(currentUserID)
+  //       .set({'token': token});
+  // }
 
-  initInfo() {
-    var androidInitialize =
-        const AndroidInitializationSettings('@mipmap/lovelogo');
-    // var iosInitialize = const IOSInitializationSettings();
-    var initializationSettings =
-        InitializationSettings(android: androidInitialize);
-    _flutterLocalNotificationsPlugin.initialize(initializationSettings);
-  }
+  // initInfo() {
+  //   var androidInitialize =
+  //       const AndroidInitializationSettings('@mipmap/lovelogo');
+  //   // var iosInitialize = const IOSInitializationSettings();
+  //   var initializationSettings =
+  //       InitializationSettings(android: androidInitialize);
+  //   _flutterLocalNotificationsPlugin.initialize(initializationSettings);
+  // }
 
   int screenIndex = 0;
   List tabList = [

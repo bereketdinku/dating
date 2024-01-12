@@ -1,9 +1,12 @@
 import 'dart:convert';
+import 'dart:io';
 
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:date/controller/message_controller.dart';
 import 'package:date/global.dart';
 import 'package:date/widgets/chat_bubble.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 // import 'package:flutter_chat_ui/flutter_chat_ui.dart';
 // import 'package:flutter_chat_types/flutter_chat_types.dart' as types;
@@ -15,6 +18,7 @@ import 'package:get/get.dart';
 // import 'package:path_provider/path_provider.dart';
 // import 'package:open_filex/open_filex.dart';
 import 'package:http/http.dart' as http;
+import 'package:emoji_picker_flutter/emoji_picker_flutter.dart';
 
 class ChatPage extends StatefulWidget {
   final String uid;
@@ -27,6 +31,30 @@ class ChatPage extends StatefulWidget {
 class _ChatPageState extends State<ChatPage> {
   final ChatController _chatController = Get.put(ChatController());
   final TextEditingController _messageController = TextEditingController();
+  bool _showemoji = false;
+  String imageProfile = '';
+  String name = '';
+  retrieveUserInfo() async {
+    await FirebaseFirestore.instance
+        .collection("users")
+        .doc(widget.uid)
+        .get()
+        .then((snapshot) {
+      if (snapshot.exists) {
+        setState(() {
+          imageProfile = snapshot.data()!["imageProfile"];
+          name = snapshot.data()!["name"];
+        });
+      }
+    });
+  }
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    retrieveUserInfo();
+  }
 
   void sendmessage() async {
     if (_messageController.text.isNotEmpty) {
@@ -37,6 +65,9 @@ class _ChatPageState extends State<ChatPage> {
           .doc(widget.uid)
           .get();
       String token = snap['token'];
+      setState(() {
+        _showemoji = false;
+      });
       sendPushMessage(token, _messageController.text, "new message");
     }
   }
@@ -69,25 +100,90 @@ class _ChatPageState extends State<ChatPage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-        appBar: AppBar(
-          title: Text('Chat'),
-          actions: [
-            IconButton(
-                onPressed: () {},
-                icon: Icon(
-                  Icons.more_horiz,
-                  size: 30,
-                  color: Colors.white,
-                ))
-          ],
+    return GestureDetector(
+      onTap: () => FocusScope.of(context).unfocus(),
+      child: SafeArea(
+        child: WillPopScope(
+          onWillPop: () {
+            if (_showemoji) {
+              setState(() {
+                _showemoji = !_showemoji;
+              });
+              return Future.value(false);
+            } else {
+              return Future.value(true);
+            }
+          },
+          child: Scaffold(
+              appBar: AppBar(
+                automaticallyImplyLeading: false,
+                flexibleSpace: _appBar(),
+              ),
+              body: Column(
+                children: [
+                  Expanded(child: _buildMessageList()),
+                  _buildMessageInput(),
+                  if (_showemoji)
+                    SizedBox(
+                      height: MediaQuery.of(context).size.height * .35,
+                      child: EmojiPicker(
+                        textEditingController: _messageController,
+                        config: Config(
+                            columns: 7,
+                            emojiSizeMax: 32 * (Platform.isIOS ? 1.30 : 1)),
+                      ),
+                    )
+                ],
+              )),
         ),
-        body: Column(
+      ),
+    );
+  }
+
+  Widget _appBar() {
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.center,
+      children: [
+        IconButton(
+            onPressed: () {
+              Get.back();
+            },
+            icon: Icon(
+              Icons.arrow_back,
+              color: Colors.black54,
+            )),
+        SizedBox(
+          width: 10,
+        ),
+        ClipRRect(
+          borderRadius:
+              BorderRadius.circular(MediaQuery.of(context).size.height * .3),
+          child: CachedNetworkImage(
+            width: MediaQuery.of(context).size.height * .05,
+            height: MediaQuery.of(context).size.height * .05,
+            imageUrl: imageProfile,
+            errorWidget: (context, url, error) => const CircleAvatar(
+              child: Icon(CupertinoIcons.person),
+            ),
+          ),
+        ),
+        SizedBox(
+          width: 10,
+        ),
+        Column(
+          mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Expanded(child: _buildMessageList()),
-            _buildMessageInput(),
+            Text(
+              name,
+              style: TextStyle(
+                  fontSize: 16,
+                  color: Colors.black54,
+                  fontWeight: FontWeight.w500),
+            )
           ],
-        ));
+        )
+      ],
+    );
   }
 
   Widget _buildMessageList() {
@@ -136,12 +232,22 @@ class _ChatPageState extends State<ChatPage> {
         child: Row(
           children: [
             IconButton(
-                onPressed: () {},
+                onPressed: () {
+                  setState(() {
+                    _showemoji = !_showemoji;
+                  });
+                },
                 icon: Icon(
                   Icons.emoji_emotions,
                 )),
             Expanded(
                 child: TextField(
+              onTap: () {
+                if (_showemoji)
+                  setState(() {
+                    _showemoji = !_showemoji;
+                  });
+              },
               keyboardType: TextInputType.multiline,
               decoration: InputDecoration(hintText: 'Type something'),
               controller: _messageController,
