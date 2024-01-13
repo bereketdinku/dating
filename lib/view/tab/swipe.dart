@@ -262,9 +262,9 @@ class _SwipeScreenState extends State<SwipeScreen> {
                                 )),
                             GestureDetector(
                                 onTap: () {
-                                  Get.to(ChatPage(
-                                    uid: eachProfileInfo.uid.toString(),
-                                  ));
+                                  // Get.to(ChatPage(
+                                  //   uid: eachProfileInfo.uid.toString(),
+                                  // ));
                                 },
                                 child: Icon(
                                   Icons.chat_bubble,

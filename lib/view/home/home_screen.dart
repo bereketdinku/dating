@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:date/global.dart';
 import 'package:date/notification/push_notification.dart';
+import 'package:date/view/chat/chat_list.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/foundation.dart';
@@ -64,7 +65,7 @@ class _HomeScreenState extends State<HomeScreen> {
   int screenIndex = 0;
   List tabList = [
     SwipeScreen(),
-    ViewScreen(),
+    ChatListPage(),
     FavoriteScreen(),
     LikeScreen(),
     UserDetailScreen(

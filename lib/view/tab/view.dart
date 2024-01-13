@@ -151,10 +151,10 @@ class _ViewScreenState extends State<ViewScreen> {
             return const Text('Loading');
           }
           return ListView(
-            children: snapshot.data!.docs
-                .map((document) => _buildMessageItem(document))
-                .toList(),
-          );
+              // children: snapshot.data!.
+              //     .map((document) => _buildMessageItem(document))
+              //     .toList(),
+              );
         });
   }
 
@@ -168,7 +168,7 @@ class _ViewScreenState extends State<ViewScreen> {
         DateFormat('yyyy-MM-dd – kk:mm').format(timestamp.toDate());
     return InkWell(
       onTap: () {
-        Get.to(ChatPage(uid: data['receiverId']));
+        // Get.to(ChatPage(uid: data['receiverId']));
       },
       child: Card(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
