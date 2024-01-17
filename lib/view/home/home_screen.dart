@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:date/api/notification.dart';
 import 'package:date/global.dart';
 import 'package:date/notification/push_notification.dart';
 import 'package:date/view/chat/chat_list.dart';
@@ -28,30 +29,29 @@ class _HomeScreenState extends State<HomeScreen> {
   void initState() {
     // TODO: implement initState
     super.initState();
-    PushNotificationSystems notificationSystems = PushNotificationSystems();
-    notificationSystems.generateDeviceRegistrationToken();
-    notificationSystems.whenNotificationReceived(context);
-    // getToken();
+    // PushNotificationSystems notificationSystems = PushNotificationSystems();
+    // notificationSystems.generateDeviceRegistrationToken();
+    // notificationSystems.whenNotificationReceived(context);
+    getToken();
   }
 
-  // void getToken() async {
-  //   await FirebaseMessaging.instance.getToken().then((token) {
-  //     setState(() {
-  //       token = token;
-  //       if (kDebugMode) {
-  //         print("my token $token");
-  //       }
-  //     });
-  //     saveToken(token!);
-  //   });
-  // }
+  void getToken() async {
+    await FirebaseMessaging.instance.getToken().then((token) {
+      setState(() {
+        token = token;
 
-  // void saveToken(String token) async {
-  //   await FirebaseFirestore.instance
-  //       .collection('users')
-  //       .doc(currentUserID)
-  //       .set({'token': token});
-  // }
+        print("my token $token");
+      });
+      saveToken(token!);
+    });
+  }
+
+  void saveToken(String token) async {
+    await FirebaseFirestore.instance
+        .collection('users')
+        .doc(FirebaseAuth.instance.currentUser!.uid)
+        .update({'userDeviceToken': token});
+  }
 
   // initInfo() {
   //   var androidInitialize =

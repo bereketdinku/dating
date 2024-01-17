@@ -24,45 +24,53 @@ class NewChatPage extends StatelessWidget {
           final users = snapshot.data!;
           return ListView.builder(
             itemCount: users.length,
-            itemBuilder: (context, index) => ListTile(
-              leading: CircleAvatar(
-                backgroundImage: NetworkImage(users[index]!['imageProfile']),
-              ),
-              title: Text(users[index]!['name']),
-              onTap: () async {
-                // Generate a unique chat ID using the member IDs and UUID
-                // Extract the user ID from the map
-                String selectedUserId = users[index]!['id'];
+            itemBuilder: (context, index) => Card(
+              shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(15)),
+              elevation: 1,
+              margin: EdgeInsets.symmetric(
+                  horizontal: MediaQuery.of(context).size.width * .04,
+                  vertical: 4),
+              child: ListTile(
+                leading: CircleAvatar(
+                  backgroundImage: NetworkImage(users[index]!['imageProfile']),
+                ),
+                title: Text(users[index]!['name']),
+                onTap: () async {
+                  // Generate a unique chat ID using the member IDs and UUID
+                  // Extract the user ID from the map
+                  String selectedUserId = users[index]!['id'];
 
-                // Generate a unique chat ID using the member IDs and UUID
-                String newChatId =
-                    '${FirebaseAuth.instance.currentUser!.uid}_$selectedUserId${Uuid().v4()}';
+                  // Generate a unique chat ID using the member IDs and UUID
+                  String newChatId =
+                      '${FirebaseAuth.instance.currentUser!.uid}_$selectedUserId${Uuid().v4()}';
 
-                // Create a new chat using the provided details
-                Chat newChat = Chat(
-                  id: newChatId,
-                  memberIds: [
-                    FirebaseAuth.instance.currentUser!.uid,
-                    users[index]!['id']
-                  ],
-                  messages: [],
-                );
+                  // Create a new chat using the provided details
+                  Chat newChat = Chat(
+                    id: newChatId,
+                    memberIds: [
+                      FirebaseAuth.instance.currentUser!.uid,
+                      users[index]!['id']
+                    ],
+                    messages: [],
+                  );
 
-                // Create the new chat in Firestore
-                await _chatController.createChat(newChat);
+                  // Create the new chat in Firestore
+                  await _chatController.createChat(newChat);
 
-                // Navigate to the ChatPage with the newly created Chat object
-                Navigator.pushReplacement(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => ChatPage(
-                      chat: newChat,
-                      currentUserId: FirebaseAuth.instance.currentUser!.uid,
-                      uid: users[index]!['id'],
+                  // Navigate to the ChatPage with the newly created Chat object
+                  Navigator.pushReplacement(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => ChatPage(
+                        chat: newChat,
+                        currentUserId: FirebaseAuth.instance.currentUser!.uid,
+                        uid: users[index]!['id'],
+                      ),
                     ),
-                  ),
-                );
-              },
+                  );
+                },
+              ),
             ),
           );
         },

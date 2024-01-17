@@ -104,9 +104,10 @@ class _UserDetailScreenState extends State<UserDetailScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
         appBar: AppBar(
+          automaticallyImplyLeading: false,
           title: const Text(
             "User Profile",
-            style: TextStyle(color: Colors.white),
+            style: TextStyle(color: Colors.black),
           ),
           centerTitle: true,
           // automaticallyImplyLeading: widget.userID==currentUserID?false:true,

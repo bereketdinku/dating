@@ -1,7 +1,9 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:date/global.dart';
 import 'package:date/view/chat/chat_page.dart';
 import 'package:date/view/tab/user_detail.dart';
+import 'package:date/widgets/custom_app_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -17,6 +19,7 @@ class _SwipeScreenState extends State<SwipeScreen> {
   ProfileController profileController = Get.put(ProfileController());
   String senderName = "";
   bool favorite = false;
+  String receiverToken = '';
   applyFilter() {
     showDialog(
         context: context,
@@ -100,6 +103,18 @@ class _SwipeScreenState extends State<SwipeScreen> {
     });
   }
 
+  retriveReceiver(String uid) async {
+    await FirebaseFirestore.instance
+        .collection('users')
+        .doc(uid)
+        .get()
+        .then((dataSnapshot) {
+      setState(() {
+        receiverToken = dataSnapshot.data()!['userDeviceToken'].toString();
+      });
+    });
+  }
+
   @override
   void initState() {
     // TODO: implement initState
@@ -109,7 +124,9 @@ class _SwipeScreenState extends State<SwipeScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(body: Obx(() {
+    return Scaffold(
+        // appBar: CustomAppBar(title: 'DISCOVER'),
+        body: Obx(() {
       return PageView.builder(
         itemCount: profileController.allUsersProfileList.length,
         controller: PageController(initialPage: 0, viewportFraction: 1),
@@ -123,7 +140,7 @@ class _SwipeScreenState extends State<SwipeScreen> {
                 child: DecoratedBox(
                   decoration: BoxDecoration(
                       image: DecorationImage(
-                          image: NetworkImage(
+                          image: CachedNetworkImageProvider(
                               eachProfileInfo.imageProfile.toString()),
                           fit: BoxFit.cover)),
                   child: Padding(
@@ -146,9 +163,13 @@ class _SwipeScreenState extends State<SwipeScreen> {
                         ),
                         Spacer(),
                         GestureDetector(
-                          onTap: () {
+                          onTap: () async {
+                            await retriveReceiver(
+                                eachProfileInfo.uid.toString());
                             profileController.ViewSentAndViewReceived(
-                                eachProfileInfo.uid.toString(), senderName);
+                                eachProfileInfo.uid.toString(),
+                                senderName,
+                                receiverToken);
                             Get.to(UserDetailScreen(
                               userID: eachProfileInfo.uid.toString(),
                             ));
@@ -244,14 +265,17 @@ class _SwipeScreenState extends State<SwipeScreen> {
                           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                           children: [
                             GestureDetector(
-                                onTap: () {
+                                onTap: () async {
                                   setState(() {
                                     favorite = !favorite;
                                   });
+                                  await retriveReceiver(
+                                      eachProfileInfo.uid.toString());
                                   profileController
                                       .favoriteSentAndFavoriteReceived(
                                           eachProfileInfo.uid.toString(),
-                                          senderName);
+                                          senderName,
+                                          receiverToken);
                                 },
                                 child: Icon(
                                   favorite
@@ -272,9 +296,13 @@ class _SwipeScreenState extends State<SwipeScreen> {
                                   color: Colors.blue,
                                 )),
                             GestureDetector(
-                              onTap: () {
+                              onTap: () async {
+                                await retriveReceiver(
+                                    eachProfileInfo.uid.toString());
                                 profileController.likeSentAndFavoriteReceived(
-                                    eachProfileInfo.uid.toString(), senderName);
+                                    eachProfileInfo.uid.toString(),
+                                    senderName,
+                                    receiverToken);
                               },
                               child: Image.asset(
                                 "assets/images/like.png",

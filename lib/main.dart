@@ -1,10 +1,17 @@
+import 'package:date/api/notification.dart';
 import 'package:date/controller/auth_controller.dart';
 import 'package:date/notification/push_notification.dart';
 import 'package:date/view/auth/login_screen.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:permission_handler/permission_handler.dart';
+
+Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
+  print('Handling a background message ${message.messageId}');
+  // Handle the received message here
+}
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -18,12 +25,10 @@ Future<void> main() async {
       .then((value) {
     Get.put(AuthenticationController());
   });
-  await Permission.notification.isDenied.then((value) {
-    if (value) {
-      Permission.notification.request();
-    }
-  });
-  await PushNotificationSystems().initNotification();
+
+  // FirebaseApi().initNotification();
+  // await PushNotificationSystems().initNotification();
+  await FirebaseApi().initNotification();
   runApp(const MyApp());
 }
 

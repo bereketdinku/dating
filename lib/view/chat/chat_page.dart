@@ -282,9 +282,11 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:intl/intl.dart';
 
 import '../../controller/message_controller.dart';
 import '../../models/chat.dart';
+import '../../models/message.dart';
 import '../../widgets/chat_bubble.dart';
 import 'package:emoji_picker_flutter/emoji_picker_flutter.dart';
 
@@ -306,9 +308,10 @@ class ChatPage extends StatefulWidget {
 class _ChatPageState extends State<ChatPage> {
   final TextEditingController _messageController = TextEditingController();
   final ChatController _chatController = ChatController();
-  bool _showEmojiPicker = false;
+  bool _showEmojiPicker = false, _isUploading = false;
   String imageProfile = '';
   String name = '';
+  String token = '';
   retrieveUserInfo() async {
     print('user widget:$widget.uid');
     await FirebaseFirestore.instance
@@ -320,6 +323,7 @@ class _ChatPageState extends State<ChatPage> {
         setState(() {
           imageProfile = snapshot.data()!["imageProfile"];
           name = snapshot.data()!["name"];
+          token = snapshot.data()!['userDeviceToken'];
         });
       }
     });
@@ -359,6 +363,14 @@ class _ChatPageState extends State<ChatPage> {
                   body: Column(
                     children: [
                       Expanded(child: _buildMessageList()),
+                      if (_isUploading)
+                        const Align(
+                            alignment: Alignment.centerRight,
+                            child: Padding(
+                                padding: EdgeInsets.symmetric(
+                                    vertical: 8, horizontal: 20),
+                                child:
+                                    CircularProgressIndicator(strokeWidth: 2))),
                       _buildMessageInput(),
                       if (_showEmojiPicker)
                         SizedBox(
@@ -421,44 +433,6 @@ class _ChatPageState extends State<ChatPage> {
     );
   }
 
-//   Widget _buildMessageList() {
-//     return StreamBuilder(
-//         stream: _chatController.getMessages(currentUserID),
-//         builder: (context, snapshot) {
-//           if (snapshot.hasError) {
-//             return Text('Error${snapshot.error}');
-//           }
-//           if (snapshot.connectionState == ConnectionState.waiting) {
-//             return const Text('Loading');
-//           }
-//           return ListView(
-//             children: snapshot.data!.docs
-//                 .map((document) => _buildMessageItem(document))
-//                 .toList(),
-//           );
-//         });
-//   }
-
-//   Widget _buildMessageItem(DocumentSnapshot document) {
-//     Map<String, dynamic> data = document.data() as Map<String, dynamic>;
-//     var alignment = (data['senderId'] == currentUserID)
-//         ? Alignment.centerRight
-//         : Alignment.centerLeft;
-//     return Container(
-//         alignment: alignment,
-//         child: Padding(
-//           padding: EdgeInsets.all(8),
-//           child: Column(
-//               crossAxisAlignment: (data['senderId'] == currentUserID)
-//                   ? CrossAxisAlignment.end
-//                   : CrossAxisAlignment.start,
-//               mainAxisAlignment: (data['senderId'] == currentUserID)
-//                   ? MainAxisAlignment.end
-//                   : MainAxisAlignment.start,
-//               children: [ChatBubble(message: data['message'])]),
-//         ));
-//   }
-
   Widget _buildMessageList() {
     return StreamBuilder<List<Message>>(
       stream: _chatController.getMessages(widget.chat.id),
@@ -499,17 +473,59 @@ class _ChatPageState extends State<ChatPage> {
                             ? MainAxisAlignment.end
                             : MainAxisAlignment.start,
                         children: [
-                          Container(
-                            padding: EdgeInsets.all(8),
-                            decoration: BoxDecoration(
-                                borderRadius: BorderRadius.circular(13),
-                                color: Colors.pinkAccent),
-                            child: Text(
-                              messages[index].content,
-                              style:
-                                  TextStyle(fontSize: 16, color: Colors.black),
-                            ),
-                          )
+                          index == 0
+                              ? Center(
+                                  child: Text(DateFormat('MMMM dd').format(
+                                      messages[index].timestamp.toDate())),
+                                )
+                              : DateFormat('MMMM dd').format(messages[index - 1]
+                                          .timestamp
+                                          .toDate()) ==
+                                      DateFormat('MMMM dd').format(
+                                          messages[index].timestamp.toDate())
+                                  ? Text('')
+                                  : Text(DateFormat('MMMM dd').format(
+                                      messages[index].timestamp.toDate())),
+                          messages[index].type == 'text'
+                              ? Container(
+                                  padding: EdgeInsets.all(8),
+                                  decoration: BoxDecoration(
+                                      borderRadius: BorderRadius.circular(13),
+                                      color: Colors.pinkAccent),
+                                  child: Text(
+                                    messages[index].content,
+                                    style: TextStyle(
+                                        fontSize: 16, color: Colors.black),
+                                  ),
+                                )
+                              : ClipRRect(
+                                  borderRadius: BorderRadius.circular(15),
+                                  child: CachedNetworkImage(
+                                    width: 250,
+                                    imageUrl: messages[index].content,
+                                    placeholder: (context, url) =>
+                                        const Padding(
+                                      padding: EdgeInsets.all(8.0),
+                                      child: CircularProgressIndicator(
+                                          strokeWidth: 2),
+                                    ),
+                                    errorWidget: (context, url, error) =>
+                                        const Icon(Icons.image, size: 70),
+                                  ),
+                                ),
+                          Text(DateFormat('hh:mm a')
+                              .format(messages[index].timestamp.toDate())),
+                          messages[index].seen
+                              ? Icon(
+                                  Icons.done_all_rounded,
+                                  color: Colors.blue,
+                                  size: 20,
+                                )
+                              : Icon(
+                                  Icons.done,
+                                  color: Colors.blue,
+                                  size: 20,
+                                ),
                         ]),
                   ));
             }
@@ -544,12 +560,28 @@ class _ChatPageState extends State<ChatPage> {
               ),
             ),
           ),
+          IconButton(
+              onPressed: () async {
+                await _chatController.pickImageFileFromGallery();
+                // setState(() {
+                //   _isUploading = true;
+                // });
+                await _chatController.sendMessageWithImage(
+                  widget.chat.id,
+                  FirebaseAuth.instance.currentUser!.uid,
+                );
+                // setState(() {
+                //   _isUploading = false;
+                // });
+              },
+              icon: Icon(Icons.image, color: Colors.blueAccent)),
           ElevatedButton(
             onPressed: () {
               _chatController.sendMessage(
                   widget.chat.id,
                   FirebaseAuth.instance.currentUser!.uid,
-                  _messageController.text);
+                  _messageController.text,
+                  token);
               _messageController.clear();
               setState(() {
                 _showEmojiPicker = false;
