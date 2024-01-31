@@ -4,6 +4,7 @@ import 'dart:io';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:date/global.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/foundation.dart';
 import 'package:get/get.dart';
 import "package:http/http.dart" as http;
 import 'package:http/http.dart';
@@ -14,31 +15,55 @@ class ProfileController extends GetxController {
   final Rx<List<Person>> usersProfileList = Rx<List<Person>>([]);
   List<Person> get allUsersProfileList => usersProfileList.value;
   NotificationService notificationService = NotificationService();
-  getResults() {
+  String gender = '';
+  getResults() async {
     onInit();
   }
 
   @override
-  void onInit() {
+  void onInit() async {
     // TODO: implement onInit
     super.onInit();
+    await FirebaseFirestore.instance
+        .collection("users")
+        .doc(currentUserID)
+        .get()
+        .then((dataSnapshot) {
+      gender = dataSnapshot.data()!["gender"].toString();
+    });
+    if (kDebugMode) {
+      print("gender $gender");
+    }
     if (chosenAge == null || chosenGender == null) {
-      usersProfileList.bindStream(FirebaseFirestore.instance
-          .collection("users")
-          .where("uid", isNotEqualTo: FirebaseAuth.instance.currentUser!.uid)
-          .snapshots()
-          .map((QuerySnapshot queryDataSnapshot) {
-        List<Person> profileList = [];
-        for (var eachProfile in queryDataSnapshot.docs) {
-          profileList.add(Person.fromDataSnapshot(eachProfile));
-        }
-        return profileList;
-      }));
+      usersProfileList.bindStream(
+        FirebaseFirestore.instance
+            .collection("users")
+            .where("uid", isNotEqualTo: FirebaseAuth.instance.currentUser!.uid)
+            .snapshots()
+            .map((QuerySnapshot queryDataSnapshot) {
+          List<Person> profileList = [];
+
+          for (var eachProfile in queryDataSnapshot.docs) {
+            var person = Person.fromDataSnapshot(eachProfile);
+
+            // Apply additional filtering based on 'gender'
+            if (person.gender!.toLowerCase() != gender.toLowerCase()) {
+              profileList.add(person);
+            }
+          }
+
+          return profileList;
+        }),
+      );
     } else {
+      if (kDebugMode) {
+        print(chosenGender);
+      }
       usersProfileList.bindStream(FirebaseFirestore.instance
           .collection("users")
           .where("uid", isNotEqualTo: FirebaseAuth.instance.currentUser!.uid)
           .where("age", isGreaterThanOrEqualTo: int.parse(chosenAge.toString()))
+          .where("gender", isEqualTo: chosenGender!.toLowerCase().toString())
           .snapshots()
           .map((QuerySnapshot queryDataSnapshot) {
         List<Person> profileList = [];

@@ -2,6 +2,7 @@ import 'package:date/api/notification.dart';
 import 'package:date/controller/auth_controller.dart';
 import 'package:date/notification/push_notification.dart';
 import 'package:date/view/auth/login_screen.dart';
+import 'package:date/view/auth/onBoarding/onBoardingScreen.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
@@ -60,7 +61,7 @@ class MyApp extends StatelessWidget {
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
         useMaterial3: true,
       ),
-      home: LoginScreen(),
+      home: OnboardingScreen(),
     );
   }
 }

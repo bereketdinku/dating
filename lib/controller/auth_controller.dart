@@ -3,6 +3,7 @@ import 'package:date/global.dart';
 import 'package:date/view/auth/login_screen.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:get/get.dart';
 import 'dart:io';
@@ -17,6 +18,19 @@ class AuthenticationController extends GetxController {
   late Rx<User?> firebaseCurrentUser;
   XFile? imageFile;
   File? get profileImage => pickedFile.value;
+  TextEditingController emailController = TextEditingController();
+  TextEditingController passwordController = TextEditingController();
+  TextEditingController nameController = TextEditingController();
+  TextEditingController genderController = TextEditingController();
+  TextEditingController ageController = TextEditingController();
+  TextEditingController phoneController = TextEditingController();
+  TextEditingController religionController = TextEditingController();
+  TextEditingController cityController = TextEditingController();
+  TextEditingController countryController = TextEditingController();
+  TextEditingController professionController = TextEditingController();
+  List<String> _selectedInterests = [];
+
+  List<String> get selectedInterests => _selectedInterests;
   pickImageFileFromGallery() async {
     imageFile = await ImagePicker().pickImage(source: ImageSource.gallery);
     if (imageFile != null) {
@@ -47,21 +61,18 @@ class AuthenticationController extends GetxController {
   }
 
   createNewUser(
-    File imageProfile,
-    String age,
-    String name,
-    String email,
-    String password,
-    String? gender,
-    String phoneNo,
-    String city,
-    String country,
-    String drink,
-    String smoke,
-    String profession,
-    String education,
-    String religion,
-  ) async {
+      File imageProfile,
+      String age,
+      String name,
+      String email,
+      String password,
+      String? gender,
+      String phoneNo,
+      String city,
+      String country,
+      String profession,
+      String religion,
+      List<String> interests) async {
     try {
       UserCredential userCredential = await FirebaseAuth.instance
           .createUserWithEmailAndPassword(email: email, password: password);
@@ -70,23 +81,20 @@ class AuthenticationController extends GetxController {
       }
       String urlOfDownloadedImage = await uploadImageToStorage(imageProfile);
       personModel.Person person = personModel.Person(
-        uid: FirebaseAuth.instance.currentUser!.uid,
-        imageProfile: urlOfDownloadedImage,
-        email: email,
-        password: password,
-        age: int.parse(age),
-        gender: gender,
-        phoneNo: phoneNo,
-        name: name,
-        city: city,
-        country: country,
-        drink: drink,
-        education: education,
-        profession: profession,
-        publishedDateTime: DateTime.now().millisecondsSinceEpoch,
-        smoke: smoke,
-        religion: religion,
-      );
+          uid: FirebaseAuth.instance.currentUser!.uid,
+          imageProfile: urlOfDownloadedImage,
+          email: email,
+          password: password,
+          age: int.parse(age),
+          gender: gender,
+          phoneNo: phoneNo,
+          name: name,
+          city: city,
+          country: country,
+          profession: profession,
+          publishedDateTime: DateTime.now().millisecondsSinceEpoch,
+          religion: religion,
+          interests: interests);
       await FirebaseFirestore.instance
           .collection("users")
           .doc(FirebaseAuth.instance.currentUser!.uid)

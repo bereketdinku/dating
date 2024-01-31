@@ -22,7 +22,7 @@ class _UserDetailScreenState extends State<UserDetailScreen> {
   String phoneNo = '';
   String city = '';
   String country = "";
-  String profileHeading = "";
+  String profilePicture = '';
   String lookingForInaPartner = "";
 
   String height = "";
@@ -75,6 +75,7 @@ class _UserDetailScreenState extends State<UserDetailScreen> {
           });
         }
         setState(() {
+          profilePicture = snapshot.data()!["imageProfile"];
           name = snapshot.data()!["name"];
           age = snapshot.data()!["age"].toString();
           phoneNo = snapshot.data()!["phoneNo"];
@@ -155,46 +156,15 @@ class _UserDetailScreenState extends State<UserDetailScreen> {
             child: Column(
               children: [
                 SizedBox(
-                  width: MediaQuery.of(context).size.width,
-                  height: MediaQuery.of(context).size.height * 0.4,
-                  child: Padding(
-                    padding: EdgeInsets.all(2),
-                    child: Carousel(
-                      indicatorBarColor: Colors.black.withOpacity(0.3),
-                      autoScrollDuration: Duration(seconds: 2),
-                      animationPageDuration: Duration(milliseconds: 500),
-                      activateIndicatorColor: Colors.black,
-                      animationPageCurve: Curves.easeIn,
-                      indicatorBarHeight: 30,
-                      indicatorHeight: 10,
-                      indicatorWidth: 10,
-                      unActivatedIndicatorColor: Colors.grey,
-                      stopAtEnd: true,
-                      items: [
-                        Image.network(
-                          urlImage1,
-                          fit: BoxFit.cover,
-                        ),
-                        Image.network(
-                          urlImage2,
-                          fit: BoxFit.cover,
-                        ),
-                        Image.network(
-                          urlImage3,
-                          fit: BoxFit.cover,
-                        ),
-                        Image.network(
-                          urlImage4,
-                          fit: BoxFit.cover,
-                        ),
-                        Image.network(
-                          urlImage5,
-                          fit: BoxFit.cover,
-                        )
-                      ],
-                    ),
-                  ),
-                ),
+                    width: MediaQuery.of(context).size.width,
+                    height: MediaQuery.of(context).size.height * 0.4,
+                    child: Padding(
+                      padding: EdgeInsets.all(2),
+                      child: Image.network(
+                        profilePicture.toString(),
+                        fit: BoxFit.cover,
+                      ),
+                    )),
                 SizedBox(
                   height: 10,
                 ),
@@ -347,7 +317,61 @@ class _UserDetailScreenState extends State<UserDetailScreen> {
                       ])
                     ],
                   ),
-                )
+                ),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      "Gallery",
+                      style: TextStyle(color: Colors.black),
+                    ),
+                    Text(
+                      "All",
+                      style: TextStyle(color: Colors.pink),
+                    )
+                  ],
+                ),
+                SizedBox(
+                  width: MediaQuery.of(context).size.width,
+                  height: MediaQuery.of(context).size.height * 0.4,
+                  child: Padding(
+                    padding: EdgeInsets.all(2),
+                    child: Carousel(
+                      indicatorBarColor: Colors.black.withOpacity(0.3),
+                      autoScrollDuration: Duration(seconds: 2),
+                      animationPageDuration: Duration(milliseconds: 500),
+                      activateIndicatorColor: Colors.black,
+                      animationPageCurve: Curves.easeIn,
+                      indicatorBarHeight: 30,
+                      indicatorHeight: 10,
+                      indicatorWidth: 10,
+                      unActivatedIndicatorColor: Colors.grey,
+                      stopAtEnd: true,
+                      items: [
+                        Image.network(
+                          urlImage1,
+                          fit: BoxFit.cover,
+                        ),
+                        Image.network(
+                          urlImage2,
+                          fit: BoxFit.cover,
+                        ),
+                        Image.network(
+                          urlImage3,
+                          fit: BoxFit.cover,
+                        ),
+                        Image.network(
+                          urlImage4,
+                          fit: BoxFit.cover,
+                        ),
+                        Image.network(
+                          urlImage5,
+                          fit: BoxFit.cover,
+                        )
+                      ],
+                    ),
+                  ),
+                ),
               ],
             ),
           ),

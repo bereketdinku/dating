@@ -73,6 +73,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:date/controller/profile_controller.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
+import 'package:flutter/foundation.dart';
 import 'package:get/get.dart';
 import 'package:http/http.dart';
 import 'package:image_picker/image_picker.dart';
@@ -106,17 +107,6 @@ class ChatController {
   }
 
   Stream<List<Chat>> getChats(String userId) {
-    // return _firestore
-    //     .collection('chats')
-    //     .where('memberIds', arrayContains: userId)
-    //     .snapshots()
-    //     .map((snapshot) => snapshot.docs
-    //         .map((doc) => Chat(
-    //             id: doc.id,
-    //             memberIds: List<String>.from(doc['memberIds']),
-    //             messages: []))
-    //         .toList());
-
     try {
       return _firestore
           .collection('chats')
@@ -191,56 +181,113 @@ class ChatController {
         .collection('chats')
         .doc(chatId)
         .collection('messages')
-        .orderBy('timestamp')
+        .orderBy('timestamp', descending: false)
         .snapshots()
-        .map((snapshot) => snapshot.docs.map((doc) {
-              final isCurrentUserSender =
-                  doc['senderId'] == FirebaseAuth.instance.currentUser!.uid;
-              final seen = isCurrentUserSender ? doc['seen'] : true;
+        .map((snapshot) {
+      return snapshot.docs.map((doc) {
+        return Message(
+          // Build your Message object based on the document data
+          id: doc.id,
+          content: doc['content'],
+          seen: doc['seen'],
+          type: doc['type'],
+          senderId: doc['senderId'],
+          timestamp: doc['timestamp'],
+        );
+      }).toList();
+    });
+  }
 
-              // Update 'seen' only if the sender is not the current user
-              if (!isCurrentUserSender && !seen) {
-                // doc.reference.update({'seen': true});
-                updateMessageSeenStatus(chatId, doc.id);
-              }
+  Future<Message> getMessageAndUpdateSeenStatus(
+      String chatId, QueryDocumentSnapshot<Map<String, dynamic>> doc) async {
+    try {
+      // Check if the current user is the sender
+      final isCurrentUserSender =
+          doc['senderId'] == FirebaseAuth.instance.currentUser!.uid;
 
-              return Message(
-                id: doc.id,
-                content: doc['content'],
-                type: doc['type'],
-                seen: seen,
-                senderId: doc['senderId'],
-                timestamp: doc['timestamp'],
-              );
-            }).toList());
+      // Determine the initial 'seen' status based on whether the current user is the sender
+      final initialSeenStatus = isCurrentUserSender ? doc['seen'] : true;
+
+      // Update 'seen' only if the sender is not the current user and the message is not seen
+      if (!isCurrentUserSender && !initialSeenStatus) {
+        // Call the updateMessageSeenStatus function to handle the update
+        await updateMessageSeenStatus(chatId, doc.id);
+      }
+
+      // Retrieve the updated document after the update
+      final updatedDoc = await doc.reference.get();
+
+      // Create a Message object from the updated document
+      final updatedMessage = Message(
+        id: updatedDoc.id,
+        content: updatedDoc['content'],
+        type: updatedDoc['type'],
+        seen: updatedDoc['seen'],
+        senderId: updatedDoc['senderId'],
+        timestamp: updatedDoc['timestamp'],
+      );
+
+      return updatedMessage;
+    } catch (e) {
+      print('Error getting and updating message: $e');
+      rethrow;
+    }
   }
 
   Future<void> updateMessageSeenStatus(String chatId, String messageId) async {
-    final messageReference = _firestore
-        .collection('chats')
-        .doc(chatId)
-        .collection('messages')
-        .doc(messageId);
-
     try {
-      // Retrieve the current message
-      DocumentSnapshot messageSnapshot = await messageReference.get();
+      final messageReference = _firestore
+          .collection('chats')
+          .doc(chatId)
+          .collection('messages')
+          .doc(messageId);
+
+      final messageSnapshot = await messageReference.get();
 
       if (messageSnapshot.exists) {
-        // Update 'seen' status only if it is false
-        if (!messageSnapshot['seen']) {
+        final isCurrentUserSender = messageSnapshot['senderId'] ==
+            FirebaseAuth.instance.currentUser!.uid;
+
+        // Update 'seen' only if the sender is not the current user and the message is not seen
+        if (!isCurrentUserSender && !messageSnapshot['seen']) {
           await messageReference.update({'seen': true});
-          print('Message seen status updated successfully.');
-        } else {
-          print('Message already marked as seen.');
         }
       } else {
-        print('Message does not exist.');
-        // Handle the case where the message does not exist.
+        if (kDebugMode) {
+          print('Message does not exist.');
+        }
       }
     } catch (e) {
-      print('Error updating message seen status: $e');
-      // Handle the error as needed.
+      if (kDebugMode) {
+        print('Error updating message seen status: $e');
+      }
+    }
+  }
+
+  Future<void> updateSeenStatusOnChatEnter(String chatId) async {
+    try {
+      final messagesReference =
+          _firestore.collection('chats').doc(chatId).collection('messages');
+
+      final messagesSnapshot = await messagesReference.get();
+
+      // Prepare a batch to update "seen" status for all messages
+      final batch = _firestore.batch();
+
+      for (final messageDoc in messagesSnapshot.docs) {
+        // Check if the message is not sent by the current user and not seen
+        if (messageDoc['senderId'] != FirebaseAuth.instance.currentUser!.uid &&
+            !messageDoc['seen']) {
+          // Update "seen" status for the message in the batch
+          batch.update(messageDoc.reference, {'seen': true});
+        }
+      }
+
+      // Commit the batch to Firestore
+      await batch.commit();
+      await _firestore.collection('chats').doc(chatId).update({'seen': true});
+    } catch (e) {
+      print('Error updating seen status on chat enter: $e');
     }
   }
 
@@ -280,28 +327,45 @@ class ChatController {
     }
   }
 
+  // Future<void> addMessageToChat(String chatId, Message newMessage) async {
+  //   try {
+  //     // Reference to the specific chat document
+  //     DocumentReference chatRef = _firestore.collection('chats').doc(chatId);
+
+  //     // Get the existing chat data
+  //     DocumentSnapshot chatSnapshot = await chatRef.get();
+  //     if (chatSnapshot.exists) {
+  //       // Get the current messages list
+  //       List<dynamic> currentMessages = chatSnapshot['messages'];
+
+  //       // Add the new message to the messages list
+  //       currentMessages.add(newMessage.toJson());
+
+  //       // Update the 'messages' field with the updated list
+  //       await chatRef.update({'messages': currentMessages});
+
+  //       print('Message added to chat successfully');
+  //     } else {
+  //       print('Chat does not exist');
+  //       // Handle the case where the chat doesn't exist
+  //     }
+  //   } catch (error) {
+  //     print('Error adding message to chat: $error');
+  //     throw error; // Handle the error as per your requirement
+  //   }
+  // }
+
   Future<void> addMessageToChat(String chatId, Message newMessage) async {
     try {
       // Reference to the specific chat document
       DocumentReference chatRef = _firestore.collection('chats').doc(chatId);
 
-      // Get the existing chat data
-      DocumentSnapshot chatSnapshot = await chatRef.get();
-      if (chatSnapshot.exists) {
-        // Get the current messages list
-        List<dynamic> currentMessages = chatSnapshot['messages'];
+      // Update the 'messages' field with a list containing the new message
+      await chatRef.update({
+        'messages': [newMessage.toJson()]
+      });
 
-        // Add the new message to the messages list
-        currentMessages.add(newMessage.toJson());
-
-        // Update the 'messages' field with the updated list
-        await chatRef.update({'messages': currentMessages});
-
-        print('Message added to chat successfully');
-      } else {
-        print('Chat does not exist');
-        // Handle the case where the chat doesn't exist
-      }
+      print('Message added to chat successfully');
     } catch (error) {
       print('Error adding message to chat: $error');
       throw error; // Handle the error as per your requirement
@@ -333,6 +397,92 @@ class ChatController {
     } catch (error) {
       print('Error fetching users: $error');
       throw error;
+    }
+  }
+
+  Future<List<Map<String, dynamic>?>> getUsersWithoutChat(
+      String currentUserId) async {
+    try {
+      QuerySnapshot usersSnapshot =
+          await FirebaseFirestore.instance.collection('users').get();
+
+      List<Map<String, dynamic>?> usersList = [];
+
+      for (QueryDocumentSnapshot userDoc in usersSnapshot.docs) {
+        if (userDoc.id != currentUserId) {
+          // Check if the user does not have a chat
+          bool doesNotHaveChat = await userDoesNotHaveChat(userDoc.id);
+
+          if (doesNotHaveChat) {
+            usersList.add({
+              'id': userDoc.id,
+              'name': userDoc['name'],
+              'imageProfile': userDoc['imageProfile'],
+            });
+          }
+        }
+      }
+
+      return usersList;
+    } catch (error) {
+      print('Error fetching users: $error');
+      throw error;
+    }
+  }
+
+  Future<bool> userDoesNotHaveChat(String userId) async {
+    try {
+      QuerySnapshot chatSnapshot = await FirebaseFirestore.instance
+          .collection('chats')
+          .where('memberIds', arrayContains: userId)
+          .limit(1)
+          .get();
+
+      return chatSnapshot.docs.isEmpty;
+    } catch (error) {
+      print('Error checking if user has a chat: $error');
+      throw error;
+    }
+  }
+
+  Future<void> deleteMessage(
+      String chatId, String messageId, String? imageUrl) async {
+    try {
+      // Delete the message entry from Firestore
+      await _firestore
+          .collection('chats')
+          .doc(chatId)
+          .collection('messages')
+          .doc(messageId)
+          .delete();
+
+      // Delete the image from storage
+      if (imageUrl != null) {
+        await deleteImageFromStorage(imageUrl);
+      }
+
+      print('Message and associated image deleted successfully');
+    } catch (error) {
+      print('Error deleting message and image: $error');
+      throw error; // Handle the error as per your requirement
+    }
+  }
+
+  Future<void> deleteImageFromStorage(String imageUrl) async {
+    try {
+      // Use your storage reference to delete the image
+      // Replace 'your_storage_reference' with the actual reference to your storage
+      // For example: FirebaseStorage.instance.ref().child('your_path').child('your_image.jpg').delete();
+      // Ensure to handle your specific storage structure and naming conventions
+      // See the Firebase Storage documentation for more details.
+
+      // Example:
+      await FirebaseStorage.instance.refFromURL(imageUrl).delete();
+
+      print('Image deleted from storage successfully');
+    } catch (error) {
+      print('Error deleting image from storage: $error');
+      throw error; // Handle the error as per your requirement
     }
   }
 

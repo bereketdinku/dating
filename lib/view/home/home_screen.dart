@@ -83,9 +83,9 @@ class _HomeScreenState extends State<HomeScreen> {
           });
         },
         type: BottomNavigationBarType.fixed,
-        backgroundColor: Colors.black,
-        selectedItemColor: Colors.white,
-        unselectedItemColor: Colors.white12,
+        backgroundColor: Colors.grey.withOpacity(.01),
+        selectedItemColor: Colors.pink,
+        unselectedItemColor: Colors.black,
         currentIndex: screenIndex,
         items: const [
           BottomNavigationBarItem(

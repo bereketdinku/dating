@@ -1,3 +1,4 @@
+import 'package:date/view/auth/onBoarding/onBoardingScreen.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -23,9 +24,9 @@ class _LoginScreenState extends State<LoginScreen> {
         child: Center(
             child: Column(
           children: [
-            const SizedBox(height: 70),
+            const SizedBox(height: 100),
             Image.asset(
-              'assets/images/lovelogo.jpg',
+              'assets/images/trademark.png',
               width: 300,
             ),
             const Text(
@@ -106,13 +107,14 @@ class _LoginScreenState extends State<LoginScreen> {
                 ),
                 InkWell(
                   onTap: () {
-                    Get.to(SignUpScreen());
+                    // Get.to(SignUpScreen());
+                    Get.to(OnboardingScreen());
                   },
                   child: const Text(
                     "Sign Up",
                     style: TextStyle(
                         fontSize: 15,
-                        color: Colors.black,
+                        color: Colors.pinkAccent,
                         fontWeight: FontWeight.bold),
                   ),
                 )

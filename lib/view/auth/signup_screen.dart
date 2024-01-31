@@ -399,11 +399,8 @@ class _SignUpScreenState extends State<SignUpScreen> {
                             phoneTextEditingController.text.trim(),
                             cityTextEditingController.text.trim(),
                             countryTextEditingController.text.trim(),
-                            drinkTextEditingController.text.trim(),
-                            smokeTextEditingController.text.trim(),
                             professionTextEditingController.text.trim(),
-                            educationTextEditingController.text.trim(),
-                            religionTextEditingController.text.trim());
+                            religionTextEditingController.text.trim(), []);
                         setState(() {
                           showProgressBar = false;
                         });

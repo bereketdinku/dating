@@ -2,8 +2,10 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 
 import '../../global.dart';
+import 'user_detail.dart';
 
 class LikeScreen extends StatefulWidget {
   const LikeScreen({super.key});
@@ -145,9 +147,16 @@ class _LikeScreenState extends State<LikeScreen> {
                     child: Card(
                       color: Colors.blue.shade200,
                       child: GestureDetector(
-                        onTap: () {},
+                        onTap: () {
+                          Get.to(UserDetailScreen(
+                            userID: likesList[index]["uid"],
+                          ));
+                        },
                         child: DecoratedBox(
                           decoration: BoxDecoration(
+                            borderRadius: BorderRadius.only(
+                                topLeft: Radius.circular(20),
+                                topRight: Radius.circular(20)),
                             image: DecorationImage(
                                 image: NetworkImage(
                                     likesList[index]["imageProfile"]),
@@ -170,28 +179,33 @@ class _LikeScreenState extends State<LikeScreen> {
                                         fontSize: 16),
                                   ),
                                   SizedBox(
-                                    height: 4,
+                                    height: 10,
                                   ),
                                   Row(
                                     children: [
                                       Icon(
                                         Icons.location_on_outlined,
-                                        color: Colors.grey,
+                                        color: Colors.green,
                                         size: 16,
                                       ),
                                       Expanded(
                                           child: Text(
                                         likesList[index]['city'].toString() +
-                                            " ," +
-                                            likesList[index]['country']
-                                                .toString(),
+                                            " ,",
                                         maxLines: 2,
                                         style: TextStyle(
                                             overflow: TextOverflow.ellipsis,
-                                            color: Colors.grey,
-                                            fontSize: 16),
+                                            color: Colors.black,
+                                            fontSize: 14),
                                       )),
                                     ],
+                                  ),
+                                  Text(
+                                    likesList[index]['country'].toString(),
+                                    style: TextStyle(
+                                        overflow: TextOverflow.ellipsis,
+                                        color: Colors.black,
+                                        fontSize: 14),
                                   )
                                 ],
                               ),

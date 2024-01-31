@@ -121,12 +121,15 @@ class ChatListPage extends StatelessWidget {
                                     children: [
                                       lastMessage.type == 'text'
                                           ? Text('${lastMessage.content}')
-                                          : Text('you have a picture'),
+                                          : lastMessage.senderId ==
+                                                  currentUserId
+                                              ? Text('you sent a picture')
+                                              : Text('you have a picture'),
                                       Text(DateFormat('MMMM dd').format(
                                           lastMessage.timestamp.toDate())),
                                     ],
                                   ),
-                                  trailing: lastMessage.seen
+                                  trailing: chat.seen == true
                                       ? Icon(Icons.done_all,
                                           color: Colors.blue) // Seen icon
                                       : Icon(Icons.done,

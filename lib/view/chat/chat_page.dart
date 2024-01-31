@@ -281,9 +281,10 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
-
+import 'package:gallery_saver/gallery_saver.dart';
 import '../../controller/message_controller.dart';
 import '../../models/chat.dart';
 import '../../models/message.dart';
@@ -334,6 +335,7 @@ class _ChatPageState extends State<ChatPage> {
     // TODO: implement initState
     super.initState();
     retrieveUserInfo();
+    _chatController.updateSeenStatusOnChatEnter(widget.chat.id);
   }
 
   @override
@@ -459,75 +461,89 @@ class _ChatPageState extends State<ChatPage> {
               var alignment = (messages[index].senderId == widget.currentUserId)
                   ? Alignment.centerRight
                   : Alignment.centerLeft;
-              return Container(
-                  alignment: alignment,
-                  child: Padding(
-                    padding: EdgeInsets.all(8),
-                    child: Column(
-                        crossAxisAlignment: (messages[index].senderId ==
-                                FirebaseAuth.instance.currentUser!.uid)
-                            ? CrossAxisAlignment.end
-                            : CrossAxisAlignment.start,
-                        mainAxisAlignment: (messages[index].senderId ==
-                                FirebaseAuth.instance.currentUser!.uid)
-                            ? MainAxisAlignment.end
-                            : MainAxisAlignment.start,
-                        children: [
-                          index == 0
-                              ? Center(
-                                  child: Text(DateFormat('MMMM dd').format(
-                                      messages[index].timestamp.toDate())),
-                                )
-                              : DateFormat('MMMM dd').format(messages[index - 1]
-                                          .timestamp
-                                          .toDate()) ==
-                                      DateFormat('MMMM dd').format(
-                                          messages[index].timestamp.toDate())
-                                  ? Text('')
-                                  : Text(DateFormat('MMMM dd').format(
-                                      messages[index].timestamp.toDate())),
-                          messages[index].type == 'text'
-                              ? Container(
-                                  padding: EdgeInsets.all(8),
-                                  decoration: BoxDecoration(
-                                      borderRadius: BorderRadius.circular(13),
-                                      color: Colors.pinkAccent),
-                                  child: Text(
-                                    messages[index].content,
-                                    style: TextStyle(
-                                        fontSize: 16, color: Colors.black),
-                                  ),
-                                )
-                              : ClipRRect(
-                                  borderRadius: BorderRadius.circular(15),
-                                  child: CachedNetworkImage(
-                                    width: 250,
-                                    imageUrl: messages[index].content,
-                                    placeholder: (context, url) =>
-                                        const Padding(
-                                      padding: EdgeInsets.all(8.0),
-                                      child: CircularProgressIndicator(
-                                          strokeWidth: 2),
+              return InkWell(
+                onTap: () {
+                  _showButtomSheet(messages[index].type,
+                      messages[index].content, messages[index].id);
+                },
+                child: Container(
+                    alignment: alignment,
+                    child: Padding(
+                      padding: EdgeInsets.all(8),
+                      child: Column(
+                          crossAxisAlignment: (messages[index].senderId ==
+                                  FirebaseAuth.instance.currentUser!.uid)
+                              ? CrossAxisAlignment.end
+                              : CrossAxisAlignment.start,
+                          mainAxisAlignment: (messages[index].senderId ==
+                                  FirebaseAuth.instance.currentUser!.uid)
+                              ? MainAxisAlignment.end
+                              : MainAxisAlignment.start,
+                          children: [
+                            index == 0
+                                ? Center(
+                                    child: Text(DateFormat('MMMM dd').format(
+                                        messages[index].timestamp.toDate())),
+                                  )
+                                : DateFormat('MMMM dd').format(
+                                            messages[index - 1]
+                                                .timestamp
+                                                .toDate()) ==
+                                        DateFormat('MMMM dd').format(
+                                            messages[index].timestamp.toDate())
+                                    ? Text('')
+                                    : Center(
+                                        child: Padding(
+                                          padding: const EdgeInsets.all(8.0),
+                                          child: Text(DateFormat('MMMM dd')
+                                              .format(messages[index]
+                                                  .timestamp
+                                                  .toDate())),
+                                        ),
+                                      ),
+                            messages[index].type == 'text'
+                                ? Container(
+                                    padding: EdgeInsets.all(8),
+                                    decoration: BoxDecoration(
+                                        borderRadius: BorderRadius.circular(13),
+                                        color: Colors.pinkAccent),
+                                    child: Text(
+                                      messages[index].content,
+                                      style: TextStyle(
+                                          fontSize: 16, color: Colors.white),
                                     ),
-                                    errorWidget: (context, url, error) =>
-                                        const Icon(Icons.image, size: 70),
+                                  )
+                                : ClipRRect(
+                                    borderRadius: BorderRadius.circular(15),
+                                    child: CachedNetworkImage(
+                                      width: 250,
+                                      imageUrl: messages[index].content,
+                                      placeholder: (context, url) =>
+                                          const Padding(
+                                        padding: EdgeInsets.all(8.0),
+                                        child: CircularProgressIndicator(
+                                            strokeWidth: 2),
+                                      ),
+                                      errorWidget: (context, url, error) =>
+                                          const Icon(Icons.image, size: 70),
+                                    ),
                                   ),
-                                ),
-                          Text(DateFormat('hh:mm a')
-                              .format(messages[index].timestamp.toDate())),
-                          messages[index].seen
-                              ? Icon(
-                                  Icons.done_all_rounded,
-                                  color: Colors.blue,
-                                  size: 20,
-                                )
-                              : Icon(
-                                  Icons.done,
-                                  color: Colors.blue,
-                                  size: 20,
-                                ),
-                        ]),
-                  ));
+                            Text(DateFormat('hh:mm a')
+                                .format(messages[index].timestamp.toDate())),
+                            messages[index].seen
+                                ? Icon(
+                                    Icons.done_all_rounded,
+                                    color: Colors.blue,
+                                    size: 20,
+                                  )
+                                : Icon(
+                                    Icons.done,
+                                    color: Colors.blue,
+                                    size: 20,
+                                  ),
+                          ]),
+                    )),
+              );
             }
             // ListTile(
             //   title: Text(messages[index].content),
@@ -536,6 +552,91 @@ class _ChatPageState extends State<ChatPage> {
             );
       },
     );
+  }
+
+  void _showButtomSheet(String type, String content, String id) {
+    showModalBottomSheet(
+        context: context,
+        shape: const RoundedRectangleBorder(
+            borderRadius: BorderRadius.only(
+                topLeft: Radius.circular(20), topRight: Radius.circular(20))),
+        builder: (_) {
+          return ListView(
+            shrinkWrap: true,
+            children: [
+              Container(
+                height: 4,
+                margin: EdgeInsets.symmetric(
+                    vertical: MediaQuery.of(context).size.height * .015,
+                    horizontal: MediaQuery.of(context).size.height * .4),
+                decoration: BoxDecoration(
+                    color: Colors.grey, borderRadius: BorderRadius.circular(8)),
+              ),
+              type == "text"
+                  ? OptionsItem(
+                      icon: Icon(
+                        Icons.copy_all_outlined,
+                        color: Colors.blue,
+                        size: 26,
+                      ),
+                      name: "Copy Text",
+                      onTap: () async {
+                        await Clipboard.setData(ClipboardData(text: content))
+                            .then((value) {
+                          Navigator.pop(context);
+                          Get.snackbar("Text", "Text copied");
+                        });
+                      })
+                  : OptionsItem(
+                      icon: Icon(
+                        Icons.download_rounded,
+                        color: Colors.blue,
+                      ),
+                      name: "Save Image",
+                      onTap: () async {
+                        try {
+                          await GallerySaver.saveImage(content).then((success) {
+                            Navigator.pop(context);
+                            if (success != null && success) {
+                              Get.snackbar("Image",
+                                  "Image save to gallery successfully");
+                            }
+                          });
+                        } catch (e) {
+                          if (kDebugMode) {
+                            print('not saved');
+                          }
+                        }
+                      },
+                    ),
+              Divider(),
+              OptionsItem(
+                  icon: Icon(
+                    Icons.edit,
+                    color: Colors.blue,
+                    size: 26,
+                  ),
+                  name: "Edit Message",
+                  onTap: () {}),
+              Divider(),
+              OptionsItem(
+                  icon: Icon(
+                    Icons.delete_forever,
+                    color: Colors.red,
+                    size: 26,
+                  ),
+                  name: "Delete Message",
+                  onTap: () async {
+                    await _chatController
+                        .deleteMessage(
+                            widget.chat.id, id, type == 'text' ? "" : content)
+                        .then((value) {
+                      Navigator.pop(context);
+                    });
+                  })
+            ],
+          );
+        });
   }
 
   Widget _buildMessageInput() {
@@ -603,5 +704,30 @@ class _ChatPageState extends State<ChatPage> {
           )
         : SizedBox
             .shrink(); // Returns an empty widget if emoji picker is not shown
+  }
+}
+
+class OptionsItem extends StatelessWidget {
+  final Icon icon;
+  final String name;
+  final VoidCallback onTap;
+  const OptionsItem(
+      {required this.icon, required this.name, required this.onTap});
+
+  @override
+  Widget build(BuildContext context) {
+    // TODO: implement build
+    return InkWell(
+      onTap: () => onTap(),
+      child: Padding(
+        padding: EdgeInsets.only(
+            left: MediaQuery.of(context).size.width * .05,
+            top: MediaQuery.of(context).size.width * .015,
+            bottom: MediaQuery.of(context).size.height * .025),
+        child: Row(
+          children: [icon, Flexible(child: Text("  $name"))],
+        ),
+      ),
+    );
   }
 }

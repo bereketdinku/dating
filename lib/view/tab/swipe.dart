@@ -81,8 +81,8 @@ class _SwipeScreenState extends State<SwipeScreen> {
               actions: [
                 ElevatedButton(
                     onPressed: () {
-                      Get.back();
                       profileController.getResults();
+                      Get.back();
                     },
                     child: Text('Done'))
               ],
@@ -241,18 +241,6 @@ class _SwipeScreenState extends State<SwipeScreen> {
                                         style: TextStyle(
                                             color: Colors.white, fontSize: 14),
                                       )),
-                                  ElevatedButton(
-                                      onPressed: () {},
-                                      style: ElevatedButton.styleFrom(
-                                          backgroundColor: Colors.white30,
-                                          shape: RoundedRectangleBorder(
-                                              borderRadius:
-                                                  BorderRadius.circular(16))),
-                                      child: Text(
-                                        eachProfileInfo.ethnicity.toString(),
-                                        style: TextStyle(
-                                            color: Colors.white, fontSize: 14),
-                                      ))
                                 ],
                               )
                             ],
@@ -284,17 +272,17 @@ class _SwipeScreenState extends State<SwipeScreen> {
                                   size: 65,
                                   color: Colors.pinkAccent,
                                 )),
-                            GestureDetector(
-                                onTap: () {
-                                  // Get.to(ChatPage(
-                                  //   uid: eachProfileInfo.uid.toString(),
-                                  // ));
-                                },
-                                child: Icon(
-                                  Icons.chat_bubble,
-                                  size: 65,
-                                  color: Colors.blue,
-                                )),
+                            // GestureDetector(
+                            //     onTap: () {
+                            //       // Get.to(ChatPage(
+                            //       //   uid: eachProfileInfo.uid.toString(),
+                            //       // ));
+                            //     },
+                            //     child: Icon(
+                            //       Icons.chat_bubble,
+                            //       size: 65,
+                            //       color: Colors.blue,
+                            //     )),
                             GestureDetector(
                               onTap: () async {
                                 await retriveReceiver(
