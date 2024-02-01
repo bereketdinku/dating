@@ -1,7 +1,6 @@
 import 'package:date/view/auth/onBoarding/First.dart';
 import 'package:date/view/auth/onBoarding/Second.dart';
 import 'package:date/view/auth/onBoarding/Thrid.dart';
-import 'package:date/view/auth/onBoarding/onBoardingPage.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -64,14 +63,20 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                     authenticationController.createNewUser(
                         authenticationController.profileImage!,
                         authenticationController.ageController.text.trim(),
-                        authenticationController.nameController.text.trim(),
+                        authenticationController.nameController.text
+                            .trim()
+                            .toUpperCase(),
                         authenticationController.emailController.text.trim(),
                         authenticationController.passwordController.text.trim(),
                         authenticationController.genderController.text
                             .toLowerCase(),
                         authenticationController.phoneController.text.trim(),
-                        authenticationController.cityController.text.trim(),
-                        authenticationController.countryController.text.trim(),
+                        authenticationController.cityController.text
+                            .trim()
+                            .toUpperCase(),
+                        authenticationController.countryController.text
+                            .trim()
+                            .toUpperCase(),
                         authenticationController.professionController.text
                             .trim(),
                         authenticationController.religionController.text.trim(),
@@ -90,9 +95,6 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                             .trim()
                             .isEmpty &&
                         authenticationController.passwordController.text
-                            .trim()
-                            .isEmpty &&
-                        authenticationController.nameController.text
                             .trim()
                             .isEmpty) {
                       Get.snackbar("missing file", "fill all");

@@ -61,11 +61,12 @@ class _SwipeScreenState extends State<SwipeScreen> {
                     child: DropdownButton<String>(
                       items: ['20', '30', '40', '45'].map((value) {
                         return DropdownMenuItem<String>(
-                            value: value,
-                            child: Text(
-                              value,
-                              style: TextStyle(fontWeight: FontWeight.w500),
-                            ));
+                          value: value,
+                          child: Text(
+                            value,
+                            style: TextStyle(fontWeight: FontWeight.w500),
+                          ),
+                        );
                       }).toList(),
                       onChanged: (String? value) {
                         setState(() {
@@ -82,6 +83,7 @@ class _SwipeScreenState extends State<SwipeScreen> {
                 ElevatedButton(
                     onPressed: () {
                       profileController.getResults();
+
                       Get.back();
                     },
                     style: ElevatedButton.styleFrom(

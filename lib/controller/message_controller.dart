@@ -76,7 +76,9 @@ import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/foundation.dart';
 import 'package:get/get.dart';
 import 'package:http/http.dart';
+import 'package:http/http.dart' as http;
 import 'package:image_picker/image_picker.dart';
+import 'package:path_provider/path_provider.dart';
 
 import '../models/chat.dart';
 import '../models/message.dart';
@@ -84,6 +86,7 @@ import '../models/message.dart';
 class ChatController {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   final ProfileController _profileController = ProfileController();
+  FirebaseStorage _storage = FirebaseStorage.instance;
   late Rx<File?> pickedFile;
   late Rx<User?> firebaseCurrentUser;
   XFile? imageFile;
@@ -286,7 +289,7 @@ class ChatController {
 
       // Commit the batch to Firestore
       await batch.commit();
-      await _firestore.collection('chats').doc(chatId).update({'seen': true});
+      // await _firestore.collection('chats').doc(chatId).update({'seen': true});
     } catch (e) {
       print('Error updating seen status on chat enter: $e');
     }
@@ -379,7 +382,8 @@ class ChatController {
 
       // Update the 'messages' field with a list containing the new message
       await chatRef.update({
-        'messages': [newMessage.toJson()]
+        'messages': [newMessage.toJson()],
+        'seen': false
       });
 
       print('Message added to chat successfully');
@@ -418,7 +422,8 @@ class ChatController {
   }
 
   Future<List<Map<String, dynamic>?>> getUsersWithoutChat(
-      String currentUserId) async {
+    String currentUserId,
+  ) async {
     try {
       QuerySnapshot usersSnapshot =
           await FirebaseFirestore.instance.collection('users').get();
@@ -427,8 +432,9 @@ class ChatController {
 
       for (QueryDocumentSnapshot userDoc in usersSnapshot.docs) {
         if (userDoc.id != currentUserId) {
-          // Check if the user does not have a chat
-          bool doesNotHaveChat = await userDoesNotHaveChat(userDoc.id);
+          // Check if the current user does not have a chat with this user
+          bool doesNotHaveChat =
+              await currentUserDoesNotHaveChat(currentUserId, userDoc.id);
 
           if (doesNotHaveChat) {
             usersList.add({
@@ -447,17 +453,27 @@ class ChatController {
     }
   }
 
-  Future<bool> userDoesNotHaveChat(String userId) async {
+  Future<bool> currentUserDoesNotHaveChat(
+    String currentUserId,
+    String otherUserId,
+  ) async {
     try {
+      // Check if there's a chat where both users are members
       QuerySnapshot chatSnapshot = await FirebaseFirestore.instance
           .collection('chats')
-          .where('memberIds', arrayContains: userId)
+          .where('memberIds', arrayContains: currentUserId)
           .limit(1)
           .get();
 
-      return chatSnapshot.docs.isEmpty;
+      // Filter locally to ensure both users are in the chat
+      bool chatFound = chatSnapshot.docs
+          .where((doc) => doc['memberIds'].contains(otherUserId))
+          .isNotEmpty;
+
+      return !chatFound;
     } catch (error) {
-      print('Error checking if user has a chat: $error');
+      print(
+          'Error checking if current user has a chat with other user: $error');
       throw error;
     }
   }
@@ -493,6 +509,28 @@ class ChatController {
     } catch (error) {
       print('Error deleting image from storage: $error');
       throw error; // Handle the error as per your requirement
+    }
+  }
+
+  Future<File> downloadImage(String imagePath) async {
+    try {
+      // Get the download URL for the image
+      String downloadURL =
+          await _storage.ref().child(imagePath).getDownloadURL();
+
+      // Download the image using http
+      http.Response response = await http.get(Uri.parse(downloadURL));
+
+      // Save the file to a temporary directory
+      final Directory tempDir = await getTemporaryDirectory();
+      final String tempPath = tempDir.path;
+      final File file = File('$tempPath/temp_image.jpg');
+      await file.writeAsBytes(response.bodyBytes);
+
+      return file;
+    } catch (e) {
+      print('Error downloading image: $e');
+      throw e;
     }
   }
 

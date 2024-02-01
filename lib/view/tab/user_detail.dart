@@ -85,16 +85,14 @@ class _UserDetailScreenState extends State<UserDetailScreen>
           name = snapshot.data()!["name"];
           age = snapshot.data()!["age"].toString();
           phoneNo = snapshot.data()!["phoneNo"];
+          bio = snapshot.data()!["bio"];
           city = snapshot.data()!["city"];
           country = snapshot.data()!["country"];
-          drink = snapshot.data()!["drink"];
-          smoke = snapshot.data()!["smoke"];
-          religion = snapshot.data()!["religion"];
-          eduation = snapshot.data()!['education'];
-          profession = snapshot.data()!['profession'];
-          bio = snapshot.data()!['bio'];
           interests = List<String>.from(snapshot.get('interests') ?? []);
+          religion = snapshot.data()!["religion"];
+          profession = snapshot.data()!['profession'];
         });
+        print(bio);
       }
     });
   }
@@ -228,16 +226,6 @@ class _UserDetailScreenState extends State<UserDetailScreen>
                   padding: EdgeInsets.all(30),
                   child: Column(
                     children: [
-                      // SizedBox(
-                      //     width: MediaQuery.of(context).size.width,
-                      //     height: MediaQuery.of(context).size.height * 0.4,
-                      //     child: Padding(
-                      //       padding: EdgeInsets.all(2),
-                      //       child: Image.network(
-                      //         profilePicture.toString(),
-                      //         fit: BoxFit.cover,
-                      //       ),
-                      //     )),
                       CircleAvatar(
                         radius: 80,
                         backgroundImage:
@@ -311,142 +299,6 @@ class _UserDetailScreenState extends State<UserDetailScreen>
                         ],
                       ),
                       SizedBox(height: 20),
-                      // Container(
-                      //   color: Colors.white,
-                      //   padding: EdgeInsets.all(20),
-                      //   child: Table(
-                      //     children: [
-                      //       TableRow(children: [
-                      //         Text(
-                      //           "Name:",
-                      //           style: TextStyle(
-                      //             color: Colors.black,
-                      //             fontSize: 18,
-                      //           ),
-                      //         ),
-                      //         Text(
-                      //           name,
-                      //           style: TextStyle(
-                      //             color: Colors.black,
-                      //             fontSize: 18,
-                      //           ),
-                      //         )
-                      //       ]),
-                      //       TableRow(children: [
-                      //         Text(
-                      //           'city',
-                      //           style: TextStyle(
-                      //             color: Colors.black,
-                      //             fontSize: 18,
-                      //           ),
-                      //         ),
-                      //         Text(
-                      //           city,
-                      //           style: TextStyle(
-                      //             color: Colors.black,
-                      //             fontSize: 18,
-                      //           ),
-                      //         )
-                      //       ]),
-                      //       TableRow(children: [
-                      //         Text(
-                      //           'Phone No',
-                      //           style: TextStyle(
-                      //             color: Colors.black,
-                      //             fontSize: 18,
-                      //           ),
-                      //         ),
-                      //         Text(
-                      //           phoneNo,
-                      //           style: TextStyle(
-                      //             color: Colors.black,
-                      //             fontSize: 18,
-                      //           ),
-                      //         )
-                      //       ]),
-                      //       TableRow(children: [
-                      //         Text(
-                      //           'Religion',
-                      //           style: TextStyle(
-                      //             color: Colors.black,
-                      //             fontSize: 18,
-                      //           ),
-                      //         ),
-                      //         Text(
-                      //           religion,
-                      //           style: TextStyle(
-                      //             color: Colors.black,
-                      //             fontSize: 18,
-                      //           ),
-                      //         )
-                      //       ]),
-                      //       TableRow(children: [
-                      //         Text(
-                      //           'Education',
-                      //           style: TextStyle(
-                      //             color: Colors.black,
-                      //             fontSize: 18,
-                      //           ),
-                      //         ),
-                      //         Text(
-                      //           eduation,
-                      //           style: TextStyle(
-                      //             color: Colors.black,
-                      //             fontSize: 18,
-                      //           ),
-                      //         )
-                      //       ]),
-                      //       TableRow(children: [
-                      //         Text(
-                      //           'profession',
-                      //           style: TextStyle(
-                      //             color: Colors.black,
-                      //             fontSize: 18,
-                      //           ),
-                      //         ),
-                      //         Text(
-                      //           profession,
-                      //           style: TextStyle(
-                      //             color: Colors.black,
-                      //             fontSize: 18,
-                      //           ),
-                      //         )
-                      //       ]),
-                      //       TableRow(children: [
-                      //         Text(
-                      //           'Drink',
-                      //           style: TextStyle(
-                      //             color: Colors.black,
-                      //             fontSize: 18,
-                      //           ),
-                      //         ),
-                      //         Text(
-                      //           drink,
-                      //           style: TextStyle(
-                      //             color: Colors.black,
-                      //             fontSize: 18,
-                      //           ),
-                      //         )
-                      //       ]),
-                      //       TableRow(children: [
-                      //         Text(
-                      //           'Smoke',
-                      //           style: TextStyle(
-                      //             color: Colors.black,
-                      //             fontSize: 18,
-                      //           ),
-                      //         ),
-                      //         Text(
-                      //           smoke,
-                      //           style: TextStyle(
-                      //             color: Colors.black,
-                      //             fontSize: 18,
-                      //           ),
-                      //         )
-                      //       ])
-                      //     ],
-                      //   ),
-                      // ),
                       Container(
                         child: TabBar(
                             labelColor: Colors.black,
@@ -643,197 +495,212 @@ class _UserDetailScreenState extends State<UserDetailScreen>
     );
   }
 
+  Row buildInterestRow(List<dynamic> interests, int startIndex, int endIndex) {
+    return Row(
+      children: interests.sublist(startIndex, endIndex).map((interest) {
+        return Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: Container(
+            width: 105,
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(10),
+              border: Border.all(
+                color: Colors.pink,
+              ),
+            ),
+            child: Center(
+              child: Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: Text(
+                  interest.toString(), // Ensure interest is treated as a String
+                  style: TextStyle(
+                    fontSize: 16,
+                    color: Colors.pink,
+                  ),
+                ),
+              ),
+            ),
+          ),
+        );
+      }).toList(),
+    );
+  }
+
   scroll() {
     return DraggableScrollableSheet(
-        initialChildSize: 0.6,
-        maxChildSize: 1.0,
-        minChildSize: 0.6,
-        builder: (context, scrollController) {
-          return Container(
-            padding: const EdgeInsets.symmetric(horizontal: 20),
-            clipBehavior: Clip.hardEdge,
-            decoration: const BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.only(
-                  topLeft: const Radius.circular(20),
-                  topRight: const Radius.circular(20)),
+      initialChildSize: 0.6,
+      maxChildSize: 1.0,
+      minChildSize: 0.6,
+      builder: (context, scrollController) {
+        return Container(
+          padding: const EdgeInsets.symmetric(horizontal: 20),
+          clipBehavior: Clip.hardEdge,
+          decoration: const BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.only(
+              topLeft: const Radius.circular(20),
+              topRight: const Radius.circular(20),
             ),
-            child: SingleChildScrollView(
-              controller: scrollController,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Padding(
-                    padding: const EdgeInsets.only(top: 10, bottom: 25),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
+          ),
+          child: SingleChildScrollView(
+            controller: scrollController,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Padding(
+                  padding: const EdgeInsets.only(top: 10, bottom: 25),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Container(
+                        height: 5,
+                        width: 35,
+                        color: Colors.black12,
+                      ),
+                    ],
+                  ),
+                ),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Column(
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Container(
+                        Text(
+                          name + ',' + age,
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 20,
+                          ),
+                        ),
+                        Center(child: Text(profession))
+                      ],
+                    ),
+                  ],
+                ),
+                const SizedBox(
+                  height: 10,
+                ),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Column(
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Location',
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 20,
+                          ),
+                        ),
+                        Text(city + ',' + country),
+                      ],
+                    ),
+                  ],
+                ),
+                const SizedBox(
+                  height: 15,
+                ),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Column(
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'About',
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 20,
+                          ),
+                        ),
+                        Text(
+                          bio,
+                        ),
+                        SizedBox(
                           height: 5,
-                          width: 35,
-                          color: Colors.black12,
+                        ),
+                        Text(
+                          'Interests',
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 22,
+                          ),
+                        ),
+                        Container(
+                          height: 180,
+                          child: Column(
+                            children: [
+                              for (int i = 0; i < interests.length; i += 3)
+                                buildInterestRow(
+                                  interests,
+                                  i,
+                                  (i + 3 <= interests.length)
+                                      ? i + 3
+                                      : interests.length,
+                                ), // Remaining rows
+                            ],
+                          ),
+                        ),
+                        SizedBox(
+                          width: MediaQuery.of(context).size.width * 0.9,
+                          height: MediaQuery.of(context).size.height * 0.4,
+                          child: Padding(
+                            padding: EdgeInsets.all(2),
+                            child: Carousel(
+                              indicatorBarColor: Colors.black.withOpacity(0.3),
+                              autoScrollDuration: Duration(seconds: 2),
+                              animationPageDuration:
+                                  Duration(milliseconds: 500),
+                              activateIndicatorColor: Colors.pink,
+                              animationPageCurve: Curves.easeIn,
+                              indicatorBarHeight: 30,
+                              indicatorHeight: 10,
+                              indicatorWidth: 10,
+                              unActivatedIndicatorColor: Colors.grey,
+                              stopAtEnd: true,
+                              items: [
+                                Image.network(
+                                  urlImage1,
+                                  fit: BoxFit.cover,
+                                ),
+                                Image.network(
+                                  urlImage2,
+                                  fit: BoxFit.cover,
+                                ),
+                                Image.network(
+                                  urlImage3,
+                                  fit: BoxFit.cover,
+                                ),
+                                Image.network(
+                                  urlImage4,
+                                  fit: BoxFit.cover,
+                                ),
+                                Image.network(
+                                  urlImage5,
+                                  fit: BoxFit.cover,
+                                )
+                              ],
+                            ),
+                          ),
                         ),
                       ],
                     ),
-                  ),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Column(
-                        mainAxisAlignment: MainAxisAlignment.start,
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            name + ',' + age,
-                            style: TextStyle(
-                                fontWeight: FontWeight.bold, fontSize: 20),
-                          ),
-                          Center(child: Text(profession))
-                        ],
-                      ),
-                      Icon(
-                        Icons.send,
-                        color: Colors.pink,
-                      )
-                    ],
-                  ),
-                  const SizedBox(
-                    height: 10,
-                  ),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Column(
-                        mainAxisAlignment: MainAxisAlignment.start,
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            'Location',
-                            style: TextStyle(
-                                fontWeight: FontWeight.bold, fontSize: 20),
-                          ),
-                          Text(city + ',' + country)
-                        ],
-                      ),
-                    ],
-                  ),
-                  const SizedBox(
-                    height: 15,
-                  ),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Column(
-                        mainAxisAlignment: MainAxisAlignment.start,
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            'About',
-                            style: TextStyle(
-                                fontWeight: FontWeight.bold, fontSize: 20),
-                          ),
-                          Text(
-                            bio,
-                            maxLines: 5,
-                          ),
-                          SizedBox(
-                            height: 5,
-                          ),
-                          Text(
-                            'Interests',
-                            style: TextStyle(
-                                fontWeight: FontWeight.bold, fontSize: 22),
-                          ),
-                          Container(
-                            height: 80, // Set the desired height
-                            child: ListView.builder(
-                              scrollDirection: Axis.horizontal,
-                              shrinkWrap: true,
-                              itemCount: interests.length,
-                              itemBuilder: (context, index) {
-                                return Padding(
-                                  padding: const EdgeInsets.all(8.0),
-                                  child: Container(
-                                    decoration: BoxDecoration(
-                                      // color: Colors.grey,
-                                      borderRadius: BorderRadius.circular(10),
-                                      border: Border.all(
-                                        color: Colors
-                                            .pink, // Change the border color to pink
-                                      ),
-                                    ),
-                                    child: Center(
-                                      child: Padding(
-                                        padding: const EdgeInsets.all(8.0),
-                                        child: Text(
-                                          interests[index],
-                                          style: TextStyle(
-                                            fontSize: 16,
-                                            color: Colors.pink,
-                                          ),
-                                        ),
-                                      ),
-                                    ),
-                                  ),
-                                );
-                              },
-                            ),
-                          ),
-                          SizedBox(
-                            width: MediaQuery.of(context).size.width * 0.9,
-                            height: MediaQuery.of(context).size.height * 0.4,
-                            child: Padding(
-                              padding: EdgeInsets.all(2),
-                              child: Carousel(
-                                indicatorBarColor:
-                                    Colors.black.withOpacity(0.3),
-                                autoScrollDuration: Duration(seconds: 2),
-                                animationPageDuration:
-                                    Duration(milliseconds: 500),
-                                activateIndicatorColor: Colors.pink,
-                                animationPageCurve: Curves.easeIn,
-                                indicatorBarHeight: 30,
-                                indicatorHeight: 10,
-                                indicatorWidth: 10,
-                                unActivatedIndicatorColor: Colors.grey,
-                                stopAtEnd: true,
-                                items: [
-                                  Image.network(
-                                    urlImage1,
-                                    fit: BoxFit.cover,
-                                  ),
-                                  Image.network(
-                                    urlImage2,
-                                    fit: BoxFit.cover,
-                                  ),
-                                  Image.network(
-                                    urlImage3,
-                                    fit: BoxFit.cover,
-                                  ),
-                                  Image.network(
-                                    urlImage4,
-                                    fit: BoxFit.cover,
-                                  ),
-                                  Image.network(
-                                    urlImage5,
-                                    fit: BoxFit.cover,
-                                  )
-                                ],
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
-                  const SizedBox(
-                    height: 10,
-                  ),
-                ],
-              ),
+                  ],
+                ),
+                const SizedBox(
+                  height: 10,
+                ),
+              ],
             ),
-          );
-        });
+          ),
+        );
+      },
+    );
   }
 
   ingredients(BuildContext context) {

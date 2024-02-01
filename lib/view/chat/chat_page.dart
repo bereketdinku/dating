@@ -273,6 +273,7 @@
 // }
 
 import 'dart:io';
+import 'dart:ui';
 
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -290,6 +291,7 @@ import '../../models/chat.dart';
 import '../../models/message.dart';
 import '../../widgets/chat_bubble.dart';
 import 'package:emoji_picker_flutter/emoji_picker_flutter.dart';
+import 'package:permission_handler/permission_handler.dart';
 
 class ChatPage extends StatefulWidget {
   final Chat chat;
@@ -361,6 +363,34 @@ class _ChatPageState extends State<ChatPage> {
                   appBar: AppBar(
                     automaticallyImplyLeading: false,
                     flexibleSpace: _appBar(),
+                    leading: InkWell(
+                      onTap: () {
+                        Navigator.pop(context);
+                      },
+                      child: Container(
+                        clipBehavior: Clip.hardEdge,
+                        height: 55,
+                        width: 55,
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(25),
+                        ),
+                        child: BackdropFilter(
+                          filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+                          child: Container(
+                            height: 55,
+                            width: 55,
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(25),
+                            ),
+                            child: const Icon(
+                              Icons.arrow_back_ios,
+                              size: 20,
+                              color: Colors.black,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
                   ),
                   body: Column(
                     children: [
@@ -599,29 +629,43 @@ class _ChatPageState extends State<ChatPage> {
                       name: "Save Image",
                       onTap: () async {
                         try {
-                          await GallerySaver.saveImage(content).then((success) {
+                          var status = await Permission.storage.status;
+                          if (status == PermissionStatus.granted) {
+                            File imageFile =
+                                await _chatController.downloadImage(content);
+                            print(imageFile);
+                            bool? success =
+                                await GallerySaver.saveImage(imageFile.path);
                             Navigator.pop(context);
-                            if (success != null && success) {
-                              Get.snackbar("Image",
-                                  "Image save to gallery successfully");
+
+                            if (success == true) {
+                              Get.snackbar(
+                                "Image",
+                                "Image saved to gallery successfully",
+                                snackPosition: SnackPosition.BOTTOM,
+                              );
+                            } else {
+                              Get.snackbar(
+                                "Image",
+                                "Failed to save image to gallery",
+                                snackPosition: SnackPosition.BOTTOM,
+                              );
                             }
-                          });
+                          } else {
+                            await Permission.storage.request();
+                          }
                         } catch (e) {
                           if (kDebugMode) {
-                            print('not saved');
+                            print('Error saving image: $e');
                           }
+                          Get.snackbar(
+                            "Error",
+                            "Failed to save image. Please check permissions.",
+                            snackPosition: SnackPosition.BOTTOM,
+                          );
                         }
                       },
                     ),
-              Divider(),
-              OptionsItem(
-                  icon: Icon(
-                    Icons.edit,
-                    color: Colors.blue,
-                    size: 26,
-                  ),
-                  name: "Edit Message",
-                  onTap: () {}),
               Divider(),
               OptionsItem(
                   icon: Icon(
@@ -682,17 +726,26 @@ class _ChatPageState extends State<ChatPage> {
               icon: Icon(Icons.image, color: Colors.blueAccent)),
           ElevatedButton(
             onPressed: () {
-              _chatController.sendMessage(
-                  widget.chat.id,
-                  FirebaseAuth.instance.currentUser!.uid,
-                  _messageController.text,
-                  token);
-              _messageController.clear();
-              setState(() {
-                _showEmojiPicker = false;
-              });
+              if (_messageController.text.trim().isNotEmpty) {
+                _chatController.sendMessage(
+                    widget.chat.id,
+                    FirebaseAuth.instance.currentUser!.uid,
+                    _messageController.text,
+                    token);
+                _messageController.clear();
+                setState(() {
+                  _showEmojiPicker = false;
+                });
+              }
             },
-            child: Text('Send'),
+            style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.pink,
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(16))),
+            child: Text(
+              'Send',
+              style: TextStyle(color: Colors.white),
+            ),
           ),
         ],
       ),

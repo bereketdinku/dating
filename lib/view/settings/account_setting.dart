@@ -288,35 +288,7 @@ class _AccountSettingScreenState extends State<AccountSettingScreen> {
                     const SizedBox(
                       height: 15,
                     ),
-                    // SizedBox(
-                    //   width: MediaQuery.of(context).size.width - 40,
-                    //   height: 50,
-                    //   child: Column(
-                    //     mainAxisAlignment: MainAxisAlignment.start,
-                    //     crossAxisAlignment: CrossAxisAlignment.start,
-                    //     children: [
-                    //       DropdownButton<String>(
-                    //         alignment: Alignment.centerLeft,
-                    //         hint: Text('Select Gender'),
-                    //         value: selectedGender,
-                    //         onChanged: (String? newValue) {
-                    //           setState(() {
-                    //             selectedGender = newValue;
-                    //             _genderTextEditingController.text =
-                    //                 selectedGender ?? 'Select Gender';
-                    //           });
-                    //         },
-                    //         items: ['Male', 'Female']
-                    //             .map<DropdownMenuItem<String>>((String value) {
-                    //           return DropdownMenuItem<String>(
-                    //             value: value,
-                    //             child: Text(value),
-                    //           );
-                    //         }).toList(),
-                    //       ),
-                    //     ],
-                    //   ),
-                    // ),
+
                     SizedBox(
                       width: MediaQuery.of(context).size.width - 40,
                       height: 50,

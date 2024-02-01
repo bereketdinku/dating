@@ -33,9 +33,6 @@ class _ChatListPageState extends State<ChatListPage> {
 
   @override
   Widget build(BuildContext context) {
-    // String currentUserId = FirebaseAuth.instance.currentUser!.uid;
-    // TextEditingController searchController = TextEditingController();
-    // List<Chat> filteredChats = [];
     return Scaffold(
       appBar: AppBar(
         title: Text('Chats'),
