@@ -280,6 +280,7 @@ class ChatController {
             !messageDoc['seen']) {
           // Update "seen" status for the message in the batch
           batch.update(messageDoc.reference, {'seen': true});
+          await updateSeenStatus(chatId);
         }
       }
 
@@ -327,33 +328,49 @@ class ChatController {
     }
   }
 
-  // Future<void> addMessageToChat(String chatId, Message newMessage) async {
-  //   try {
-  //     // Reference to the specific chat document
-  //     DocumentReference chatRef = _firestore.collection('chats').doc(chatId);
+  Future<String> getUserNameFromMemberId(String memberId) async {
+    try {
+      // Retrieve the user information from Firestore
+      DocumentSnapshot userSnapshot = await FirebaseFirestore.instance
+          .collection('users')
+          .doc(memberId)
+          .get();
 
-  //     // Get the existing chat data
-  //     DocumentSnapshot chatSnapshot = await chatRef.get();
-  //     if (chatSnapshot.exists) {
-  //       // Get the current messages list
-  //       List<dynamic> currentMessages = chatSnapshot['messages'];
+      if (userSnapshot.exists) {
+        Map<String, dynamic> userData =
+            userSnapshot.data() as Map<String, dynamic>;
+        String userName = userData['name'];
+        return userName;
+      } else {
+        return 'Unknown User'; // Placeholder if user data doesn't exist
+      }
+    } catch (error) {
+      print('Error retrieving user information: $error');
+      throw error;
+    }
+  }
 
-  //       // Add the new message to the messages list
-  //       currentMessages.add(newMessage.toJson());
+  Future<List<Chat>> filterChatsByQuery(
+      String currentUserId, String query, List<Chat> chats) async {
+    query = query.toLowerCase();
 
-  //       // Update the 'messages' field with the updated list
-  //       await chatRef.update({'messages': currentMessages});
+    List<Chat> filteredChats = [];
 
-  //       print('Message added to chat successfully');
-  //     } else {
-  //       print('Chat does not exist');
-  //       // Handle the case where the chat doesn't exist
-  //     }
-  //   } catch (error) {
-  //     print('Error adding message to chat: $error');
-  //     throw error; // Handle the error as per your requirement
-  //   }
-  // }
+    await Future.wait(chats.map((chat) async {
+      // Filter based on chat members' names
+      for (String memberId in chat.memberIds) {
+        String userName = await getUserNameFromMemberId(memberId);
+        if (userName.toLowerCase().contains(query)) {
+          filteredChats.add(chat);
+          break; // Break out of the inner loop once a match is found
+        }
+      }
+
+      // Add additional filtering logic if needed
+    }));
+
+    return filteredChats;
+  }
 
   Future<void> addMessageToChat(String chatId, Message newMessage) async {
     try {
@@ -470,13 +487,6 @@ class ChatController {
 
   Future<void> deleteImageFromStorage(String imageUrl) async {
     try {
-      // Use your storage reference to delete the image
-      // Replace 'your_storage_reference' with the actual reference to your storage
-      // For example: FirebaseStorage.instance.ref().child('your_path').child('your_image.jpg').delete();
-      // Ensure to handle your specific storage structure and naming conventions
-      // See the Firebase Storage documentation for more details.
-
-      // Example:
       await FirebaseStorage.instance.refFromURL(imageUrl).delete();
 
       print('Image deleted from storage successfully');
@@ -492,13 +502,29 @@ class ChatController {
       await _firestore.collection('chats').doc(newChat.id).set({
         'id': newChat.id,
         'memberIds': newChat.memberIds,
-        'messages': newChat.messages
-            .map((message) => message.toJson())
-            .toList(), // Assuming you have a method toJson() in your Message model
+        'messages':
+            newChat.messages.map((message) => message.toJson()).toList(),
+        'seen': newChat
+            .seen // Assuming you have a method toJson() in your Message model
       });
       print('Chat created successfully');
     } catch (error) {
       print('Error creating chat: $error');
+      throw error; // Handle the error as per your requirement
+    }
+  }
+
+  Future<void> updateSeenStatus(
+    String chatId,
+  ) async {
+    try {
+      // Update the 'seen' field in the Firestore document
+      await _firestore.collection('chats').doc(chatId).update({
+        'seen': true,
+      });
+      print('Seen status updated successfully');
+    } catch (error) {
+      print('Error updating seen status: $error');
       throw error; // Handle the error as per your requirement
     }
   }

@@ -506,7 +506,11 @@ class _ChatPageState extends State<ChatPage> {
                                     padding: EdgeInsets.all(8),
                                     decoration: BoxDecoration(
                                         borderRadius: BorderRadius.circular(13),
-                                        color: Colors.pinkAccent),
+                                        color: (messages[index].senderId ==
+                                                FirebaseAuth
+                                                    .instance.currentUser!.uid)
+                                            ? Colors.grey
+                                            : Colors.pinkAccent),
                                     child: Text(
                                       messages[index].content,
                                       style: TextStyle(

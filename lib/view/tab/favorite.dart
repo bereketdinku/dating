@@ -90,7 +90,7 @@ class _FavoriteScreenState extends State<FavoriteScreen> {
                     "My Favorites",
                     style: TextStyle(
                         color:
-                            isFavoriteSentClicked ? Colors.black : Colors.grey,
+                            isFavoriteSentClicked ? Colors.pink : Colors.black,
                         fontWeight: isFavoriteSentClicked
                             ? FontWeight.bold
                             : FontWeight.normal),
@@ -116,7 +116,7 @@ class _FavoriteScreenState extends State<FavoriteScreen> {
                     "I'm their Favorite",
                     style: TextStyle(
                         color:
-                            isFavoriteSentClicked ? Colors.grey : Colors.black,
+                            isFavoriteSentClicked ? Colors.black : Colors.pink,
                         fontWeight: isFavoriteSentClicked
                             ? FontWeight.normal
                             : FontWeight.bold),
@@ -161,15 +161,22 @@ class _FavoriteScreenState extends State<FavoriteScreen> {
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   Spacer(),
-                                  Text(
-                                    favoritesList[index]['name'].toString() +
-                                        "" +
-                                        favoritesList[index]['age'].toString(),
-                                    style: TextStyle(
-                                        overflow: TextOverflow.ellipsis,
-                                        fontWeight: FontWeight.bold,
-                                        fontSize: 16),
-                                  ),
+                                  ElevatedButton(
+                                      onPressed: () {},
+                                      style: ElevatedButton.styleFrom(
+                                          backgroundColor: Colors.white30,
+                                          shape: RoundedRectangleBorder(
+                                              borderRadius:
+                                                  BorderRadius.circular(16))),
+                                      child: Text(
+                                        favoritesList[index]['name']
+                                                .toString() +
+                                            '' +
+                                            favoritesList[index]['age']
+                                                .toString(),
+                                        style: TextStyle(
+                                            color: Colors.white, fontSize: 14),
+                                      )),
                                   SizedBox(
                                     height: 4,
                                   ),
@@ -181,19 +188,24 @@ class _FavoriteScreenState extends State<FavoriteScreen> {
                                         color: Colors.grey,
                                         size: 16,
                                       ),
-                                      Expanded(
+                                      SizedBox(
+                                        width: 5,
+                                      ),
+                                      ElevatedButton(
+                                          onPressed: () {},
+                                          style: ElevatedButton.styleFrom(
+                                              backgroundColor: Colors.white30,
+                                              shape: RoundedRectangleBorder(
+                                                  borderRadius:
+                                                      BorderRadius.circular(
+                                                          16))),
                                           child: Text(
-                                        favoritesList[index]['city']
-                                                .toString() +
-                                            " ," +
-                                            favoritesList[index]['country']
+                                            favoritesList[index]['city']
                                                 .toString(),
-                                        maxLines: 2,
-                                        style: TextStyle(
-                                            overflow: TextOverflow.ellipsis,
-                                            color: Colors.grey,
-                                            fontSize: 16),
-                                      )),
+                                            style: TextStyle(
+                                                color: Colors.white,
+                                                fontSize: 14),
+                                          )),
                                     ],
                                   )
                                 ],

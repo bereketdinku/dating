@@ -57,7 +57,29 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                 if (_currentPage == onboardingPages.length - 1) {
                   // Navigate to the next screen or perform any action
                   // when the user clicks on the "Get Started" button
-                  print("Get Started");
+                  if (authenticationController.selectedInterests != null &&
+                      authenticationController.bioController.text
+                          .trim()
+                          .isNotEmpty) {
+                    authenticationController.createNewUser(
+                        authenticationController.profileImage!,
+                        authenticationController.ageController.text.trim(),
+                        authenticationController.nameController.text.trim(),
+                        authenticationController.emailController.text.trim(),
+                        authenticationController.passwordController.text.trim(),
+                        authenticationController.genderController.text
+                            .toLowerCase(),
+                        authenticationController.phoneController.text.trim(),
+                        authenticationController.cityController.text.trim(),
+                        authenticationController.countryController.text.trim(),
+                        authenticationController.professionController.text
+                            .trim(),
+                        authenticationController.religionController.text.trim(),
+                        authenticationController.selectedInterests,
+                        authenticationController.bioController.text.trim());
+                  } else {
+                    Get.snackbar('missing feild', "fill bio and interests");
+                  }
                 } else {
                   if (_currentPage == 0) {
                     if (authenticationController.imageFile == null &&
@@ -111,7 +133,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
               },
               child: Text(
                 _currentPage == onboardingPages.length - 1 ? "Sign Up" : "Next",
-                style: TextStyle(fontSize: 16.0),
+                style: TextStyle(fontSize: 16.0, color: Colors.pink),
               ),
             ),
           ),

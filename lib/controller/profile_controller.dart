@@ -214,45 +214,33 @@ class ProfileController extends GetxController {
     }
   }
 
-  // sendNotificationToUser(receiverID, featureType, senderName) async {
-  //   String userDeviceToken = "";
-  //   await FirebaseFirestore.instance
-  //       .collection("users")
-  //       .doc()
-  //       .get()
-  //       .then((snapshot) {
-  //     if (snapshot.data()!['userDeviceToken'] != null) {
-  //       userDeviceToken = snapshot.data()!['userDeviceToken'].toString();
-  //     }
-  //   });
-  //   notificationFormat(userDeviceToken, receiverID, featureType, senderName);
-  // }
+  Future<int> getFavoriteCount(String? currentUserID) async {
+    var snapshot = await FirebaseFirestore.instance
+        .collection("users")
+        .doc(currentUserID)
+        .collection('favoriteReceived')
+        .get();
 
-  // notificationFormat(userDeviceToken, receiverID, featureType, senderName) {
-  //   Map<String, String> headerNotification = {
-  //     "Content-Type": "application/jspn",
-  //     'Authorization': fcmServerToken
-  //   };
-  //   Map bodyNotification = {
-  //     "body":
-  //         "you have received a new $featureType from $senderName. Click to see.",
-  //     "title": "New $featureType"
-  //   };
-  //   Map dataMap = {
-  //     "click_action": "FLUTTER_NOTIFICATION_CLICK",
-  //     "id": "1",
-  //     "status": "done",
-  //     "userID": receiverID,
-  //     "senderID": FirebaseAuth.instance.currentUser!.uid
-  //   };
-  //   Map notificationOfficialFormat = {
-  //     "notification": bodyNotification,
-  //     "data": dataMap,
-  //     "priority": 'high',
-  //     "to": userDeviceToken
-  //   };
-  //   http.post(Uri.parse("https://fcm.googleapis.com/fcm/send"),
-  //       headers: headerNotification,
-  //       body: jsonEncode(notificationOfficialFormat));
-  // }
+    return snapshot.size; // Returns the number of documents in the collection
+  }
+
+  Future<int> getFavoritesCount(String? currentUserID) async {
+    var snapshot = await FirebaseFirestore.instance
+        .collection("users")
+        .doc(currentUserID)
+        .collection('favoriteSent')
+        .get();
+
+    return snapshot.size; // Returns the number of documents in the collection
+  }
+
+  Future<int> getLikeCount(String? currentUserID) async {
+    var snapshot = await FirebaseFirestore.instance
+        .collection("users")
+        .doc(currentUserID)
+        .collection('likeReceived')
+        .get();
+
+    return snapshot.size; // Returns the number of documents in the collection
+  }
 }

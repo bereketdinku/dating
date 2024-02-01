@@ -28,9 +28,10 @@ class AuthenticationController extends GetxController {
   TextEditingController cityController = TextEditingController();
   TextEditingController countryController = TextEditingController();
   TextEditingController professionController = TextEditingController();
-  List<String> _selectedInterests = [];
+  TextEditingController bioController = TextEditingController();
+  final List<String> _selectedInterests = [];
 
-  List<String> get selectedInterests => _selectedInterests;
+  List<String> selectedInterests = [];
   pickImageFileFromGallery() async {
     imageFile = await ImagePicker().pickImage(source: ImageSource.gallery);
     if (imageFile != null) {
@@ -72,7 +73,8 @@ class AuthenticationController extends GetxController {
       String country,
       String profession,
       String religion,
-      List<String> interests) async {
+      List<String> interests,
+      String bio) async {
     try {
       UserCredential userCredential = await FirebaseAuth.instance
           .createUserWithEmailAndPassword(email: email, password: password);
@@ -94,7 +96,8 @@ class AuthenticationController extends GetxController {
           profession: profession,
           publishedDateTime: DateTime.now().millisecondsSinceEpoch,
           religion: religion,
-          interests: interests);
+          interests: interests,
+          bio: bio);
       await FirebaseFirestore.instance
           .collection("users")
           .doc(FirebaseAuth.instance.currentUser!.uid)
@@ -173,15 +176,6 @@ class AuthenticationController extends GetxController {
         .orderBy("time", descending: true)
         .snapshots();
   }
-  // Future<Stream<QuerySnapshot>> getChatRooms() async {
-  //   String? myUsername = await SharedPreferenceHelper().getUserName();
-  //   print(myUsername);
-  //   return FirebaseFirestore.instance
-  //       .collection("chatrooms")
-  //       .orderBy("time", descending: true)
-  //       .where("users", arrayContains: myUsername!)
-  //       .snapshots();
-  // }
 
   // @override
   void onReady() {

@@ -59,7 +59,7 @@ class _SwipeScreenState extends State<SwipeScreen> {
                   SingleChildScrollView(
                     scrollDirection: Axis.horizontal,
                     child: DropdownButton<String>(
-                      items: ['30', '40', '45'].map((value) {
+                      items: ['20', '30', '40', '45'].map((value) {
                         return DropdownMenuItem<String>(
                             value: value,
                             child: Text(
@@ -84,7 +84,14 @@ class _SwipeScreenState extends State<SwipeScreen> {
                       profileController.getResults();
                       Get.back();
                     },
-                    child: Text('Done'))
+                    style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.pink,
+                        shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(16))),
+                    child: Text(
+                      'Done',
+                      style: TextStyle(color: Colors.white),
+                    ))
               ],
             );
           });
@@ -158,6 +165,7 @@ class _SwipeScreenState extends State<SwipeScreen> {
                                 icon: Icon(
                                   Icons.filter_list,
                                   size: 30,
+                                  color: Colors.pink,
                                 )),
                           ),
                         ),
@@ -208,7 +216,7 @@ class _SwipeScreenState extends State<SwipeScreen> {
                                               borderRadius:
                                                   BorderRadius.circular(16))),
                                       child: Text(
-                                        eachProfileInfo.profession.toString(),
+                                        eachProfileInfo.country.toString(),
                                         style: TextStyle(
                                             color: Colors.white, fontSize: 14),
                                       )),
@@ -226,23 +234,6 @@ class _SwipeScreenState extends State<SwipeScreen> {
                                       ))
                                 ],
                               ),
-                              Row(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  ElevatedButton(
-                                      onPressed: () {},
-                                      style: ElevatedButton.styleFrom(
-                                          backgroundColor: Colors.white30,
-                                          shape: RoundedRectangleBorder(
-                                              borderRadius:
-                                                  BorderRadius.circular(16))),
-                                      child: Text(
-                                        eachProfileInfo.country.toString(),
-                                        style: TextStyle(
-                                            color: Colors.white, fontSize: 14),
-                                      )),
-                                ],
-                              )
                             ],
                           ),
                         ),
@@ -266,9 +257,7 @@ class _SwipeScreenState extends State<SwipeScreen> {
                                           receiverToken);
                                 },
                                 child: Icon(
-                                  favorite
-                                      ? Icons.favorite
-                                      : Icons.favorite_border,
+                                  Icons.favorite,
                                   size: 65,
                                   color: Colors.pinkAccent,
                                 )),
@@ -284,19 +273,19 @@ class _SwipeScreenState extends State<SwipeScreen> {
                             //       color: Colors.blue,
                             //     )),
                             GestureDetector(
-                              onTap: () async {
-                                await retriveReceiver(
-                                    eachProfileInfo.uid.toString());
-                                profileController.likeSentAndFavoriteReceived(
-                                    eachProfileInfo.uid.toString(),
-                                    senderName,
-                                    receiverToken);
-                              },
-                              child: Image.asset(
-                                "assets/images/like.png",
-                                width: 60,
-                              ),
-                            )
+                                onTap: () async {
+                                  await retriveReceiver(
+                                      eachProfileInfo.uid.toString());
+                                  profileController.likeSentAndFavoriteReceived(
+                                      eachProfileInfo.uid.toString(),
+                                      senderName,
+                                      receiverToken);
+                                },
+                                child: Icon(
+                                  Icons.star,
+                                  size: 80,
+                                  color: Colors.purple,
+                                ))
                           ],
                         )
                       ],

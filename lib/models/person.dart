@@ -5,7 +5,6 @@ class Person {
   String? imageProfile;
   String? name;
   String? email;
-
   String? password;
   int? age;
   String? gender;
@@ -16,23 +15,31 @@ class Person {
   String? profession;
   String? religion;
   List<String>? interests;
-  Person(
-      {this.uid,
-      this.imageProfile,
-      this.age,
-      this.gender,
-      this.city,
-      this.country,
-      this.name,
-      this.phoneNo,
-      this.profession,
-      this.publishedDateTime,
-      this.religion,
-      this.email,
-      this.password,
-      this.interests});
+  String? bio;
+
+  Person({
+    this.uid,
+    this.imageProfile,
+    this.age,
+    this.gender,
+    this.city,
+    this.country,
+    this.name,
+    this.phoneNo,
+    this.profession,
+    this.publishedDateTime,
+    this.religion,
+    this.email,
+    this.password,
+    this.interests,
+    this.bio,
+  });
   static Person fromDataSnapshot(DocumentSnapshot snapshot) {
     var dataSnapshot = snapshot.data() as Map<String, dynamic>;
+    List<dynamic>? interestsData = dataSnapshot['interests'];
+
+    // Use null-aware spread operator to convert List<dynamic>? to List<String>?
+    List<String>? interests = interestsData?.cast<String>();
     return Person(
         uid: dataSnapshot['uid'],
         name: dataSnapshot['name'],
@@ -46,7 +53,8 @@ class Person {
         phoneNo: dataSnapshot['phoneNo'],
         publishedDateTime: dataSnapshot['publishedDateTime'],
         religion: dataSnapshot['religion'],
-        interests: dataSnapshot['interests']);
+        interests: interests,
+        bio: dataSnapshot['bio']);
   }
 
   Map<String, dynamic> toJson() => {
@@ -62,6 +70,7 @@ class Person {
         "profession": profession,
         "publishedDateTime": publishedDateTime,
         "religion": religion,
-        "interests": interests
+        "interests": interests,
+        "bio": bio
       };
 }

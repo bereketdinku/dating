@@ -95,7 +95,7 @@ class _LikeScreenState extends State<LikeScreen> {
                     "My Likes",
                     style: TextStyle(
                         color:
-                            isFavoriteSentClicked ? Colors.black : Colors.grey,
+                            isFavoriteSentClicked ? Colors.pink : Colors.black,
                         fontWeight: isFavoriteSentClicked
                             ? FontWeight.bold
                             : FontWeight.normal),
@@ -121,7 +121,7 @@ class _LikeScreenState extends State<LikeScreen> {
                     " Like Me",
                     style: TextStyle(
                         color:
-                            isFavoriteSentClicked ? Colors.grey : Colors.black,
+                            isFavoriteSentClicked ? Colors.black : Colors.pink,
                         fontWeight: isFavoriteSentClicked
                             ? FontWeight.normal
                             : FontWeight.bold),
@@ -169,15 +169,20 @@ class _LikeScreenState extends State<LikeScreen> {
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   Spacer(),
-                                  Text(
-                                    likesList[index]['name'].toString() +
-                                        "" +
-                                        likesList[index]['age'].toString(),
-                                    style: TextStyle(
-                                        overflow: TextOverflow.ellipsis,
-                                        fontWeight: FontWeight.bold,
-                                        fontSize: 16),
-                                  ),
+                                  ElevatedButton(
+                                      onPressed: () {},
+                                      style: ElevatedButton.styleFrom(
+                                          backgroundColor: Colors.white30,
+                                          shape: RoundedRectangleBorder(
+                                              borderRadius:
+                                                  BorderRadius.circular(16))),
+                                      child: Text(
+                                        likesList[index]['name'].toString() +
+                                            '' +
+                                            likesList[index]['age'].toString(),
+                                        style: TextStyle(
+                                            color: Colors.white, fontSize: 14),
+                                      )),
                                   SizedBox(
                                     height: 10,
                                   ),
@@ -188,25 +193,22 @@ class _LikeScreenState extends State<LikeScreen> {
                                         color: Colors.green,
                                         size: 16,
                                       ),
-                                      Expanded(
+                                      ElevatedButton(
+                                          onPressed: () {},
+                                          style: ElevatedButton.styleFrom(
+                                              backgroundColor: Colors.white30,
+                                              shape: RoundedRectangleBorder(
+                                                  borderRadius:
+                                                      BorderRadius.circular(
+                                                          16))),
                                           child: Text(
-                                        likesList[index]['city'].toString() +
-                                            " ,",
-                                        maxLines: 2,
-                                        style: TextStyle(
-                                            overflow: TextOverflow.ellipsis,
-                                            color: Colors.black,
-                                            fontSize: 14),
-                                      )),
+                                            likesList[index]['city'].toString(),
+                                            style: TextStyle(
+                                                color: Colors.white,
+                                                fontSize: 14),
+                                          )),
                                     ],
                                   ),
-                                  Text(
-                                    likesList[index]['country'].toString(),
-                                    style: TextStyle(
-                                        overflow: TextOverflow.ellipsis,
-                                        color: Colors.black,
-                                        fontSize: 14),
-                                  )
                                 ],
                               ),
                             ),

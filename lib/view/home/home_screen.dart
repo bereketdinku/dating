@@ -83,7 +83,7 @@ class _HomeScreenState extends State<HomeScreen> {
           });
         },
         type: BottomNavigationBarType.fixed,
-        backgroundColor: Colors.grey.withOpacity(.01),
+        backgroundColor: Colors.white,
         selectedItemColor: Colors.pink,
         unselectedItemColor: Colors.black,
         currentIndex: screenIndex,
@@ -96,19 +96,19 @@ class _HomeScreenState extends State<HomeScreen> {
               label: ""),
           BottomNavigationBarItem(
               icon: Icon(
-                Icons.remove_red_eye,
-                size: 30,
-              ),
-              label: ""),
-          BottomNavigationBarItem(
-              icon: Icon(
-                Icons.star,
+                Icons.chat,
                 size: 30,
               ),
               label: ""),
           BottomNavigationBarItem(
               icon: Icon(
                 Icons.favorite,
+                size: 30,
+              ),
+              label: ""),
+          BottomNavigationBarItem(
+              icon: Icon(
+                Icons.star,
                 size: 30,
               ),
               label: ""),

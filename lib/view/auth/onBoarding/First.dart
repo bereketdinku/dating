@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'dart:ui';
 
 import 'package:date/controller/auth_controller.dart';
 import 'package:flutter/material.dart';
@@ -18,7 +19,36 @@ class _FirstPageState extends State<FirstPage> {
     var authenticationController =
         AuthenticationController.authenticationController;
     return Scaffold(
-      appBar: AppBar(),
+      appBar: AppBar(
+        leading: InkWell(
+          onTap: () {
+            Navigator.pop(context);
+          },
+          child: Container(
+            clipBehavior: Clip.hardEdge,
+            height: 55,
+            width: 55,
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(25),
+            ),
+            child: BackdropFilter(
+              filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+              child: Container(
+                height: 55,
+                width: 55,
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(25),
+                ),
+                child: const Icon(
+                  Icons.arrow_back_ios,
+                  size: 20,
+                  color: Colors.black,
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
       body: SingleChildScrollView(
         child: Padding(
           padding: const EdgeInsets.all(16),
@@ -26,10 +56,10 @@ class _FirstPageState extends State<FirstPage> {
             // mainAxisAlignment: MainAxisAlignment.center,
             children: [
               SizedBox(
-                height: 50,
+                height: 30,
               ),
               Text(
-                "Profile details",
+                "Profile Details",
                 style: TextStyle(
                     color: Colors.black,
                     fontWeight: FontWeight.bold,
@@ -43,7 +73,7 @@ class _FirstPageState extends State<FirstPage> {
                       radius: 80,
                       backgroundImage:
                           AssetImage('assets/images/profile_avatar.jpg'),
-                      backgroundColor: Colors.black,
+                      backgroundColor: Colors.white,
                     )
                   : Container(
                       width: 100,
@@ -69,7 +99,7 @@ class _FirstPageState extends State<FirstPage> {
                       },
                       icon: Icon(
                         Icons.image_outlined,
-                        color: Colors.grey,
+                        color: Colors.pink,
                         size: 30,
                       )),
                   SizedBox(
@@ -84,7 +114,7 @@ class _FirstPageState extends State<FirstPage> {
                       },
                       icon: Icon(
                         Icons.camera_alt_outlined,
-                        color: Colors.grey,
+                        color: Colors.pink,
                         size: 30,
                       ))
                 ],
@@ -103,7 +133,7 @@ class _FirstPageState extends State<FirstPage> {
                 ),
               ),
               const SizedBox(
-                height: 15,
+                height: 25,
               ),
               SizedBox(
                 width: MediaQuery.of(context).size.width - 40,
@@ -116,7 +146,7 @@ class _FirstPageState extends State<FirstPage> {
                 ),
               ),
               SizedBox(
-                height: 15,
+                height: 25,
               ),
               SizedBox(
                 width: MediaQuery.of(context).size.width - 40,

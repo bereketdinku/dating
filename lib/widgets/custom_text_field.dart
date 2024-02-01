@@ -20,7 +20,10 @@ class CustomTextField extends StatelessWidget {
       decoration: InputDecoration(
           labelText: labelText,
           prefixIcon: iconData != null
-              ? Icon(iconData)
+              ? Icon(
+                  iconData,
+                  color: Colors.pink,
+                )
               : Padding(
                   padding: const EdgeInsets.all(8),
                   child: Image.asset(assetRef.toString()),
